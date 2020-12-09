@@ -21,7 +21,7 @@ async fn hello() -> impl Responder {
 async fn main() -> std::io::Result<()> {
     println!("Starting server...");
     HttpServer::new(|| App::new().service(hello).service(live).service(ready))
-        .bind("127.0.0.1:8080")?
+        .bind("0.0.0.0:8080")?
         .run()
         .await
 }
