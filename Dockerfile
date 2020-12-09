@@ -1,8 +1,10 @@
-FROM rust:1.48
+FROM rust:latest
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/monadium
 COPY . .
 
 RUN cargo install --path .
 
-CMD ["app"]
+EXPOSE 8080
+
+CMD ["monadium"]
