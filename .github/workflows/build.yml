@@ -1,12 +1,9 @@
-name: Push to GCR GitHub Action
-on: [push]
-jobs:
-  build-and-push-to-gcr:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: RafikFarhad/push-to-gcr-github-action@v3
-        with:
-          gcloud_service_key: ${{ secrets.GCLOUD_SERVICE_KEY }}
-          registry: gcr.io
-          project_id: monadium
-          image_name: monadium
+- name: Push Docker GCR
+  uses: RaccoonDev/push-docker-gcr@v1
+  with:
+    gcr_host: eu.gcr.io
+    image_name: monadium
+    image_tag: latest
+    env:
+      GCLOUD_SERVICE_KEY: ${{ secrets.GCLOUD_SERVICE_KEY }}
+      GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
