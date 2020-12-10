@@ -39,3 +39,11 @@ jobs:
       - name: Build
         run: |-
           docker push eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
+
+      # Deploy the Docker image to the GKE cluster
+      - name: Deploy
+        run: |
+          gcloud run deploy ${{ secrets.GCP_APPLICATION }} --image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
+          --platform managed \
+          --allow-unauthenticated \
+          --memory 512M
