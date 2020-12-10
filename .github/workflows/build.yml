@@ -46,4 +46,4 @@ jobs:
           gcloud run deploy ${{ secrets.GCP_APPLICATION }} --image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
           --platform managed \
           --allow-unauthenticated \
-          --memory 512M
+          --memory 256M
