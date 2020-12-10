@@ -43,7 +43,8 @@ jobs:
       # Deploy the Docker image to the GKE cluster
       - name: Deploy
         run: |
-          gcloud run deploy ${{ secrets.GCP_APPLICATION }} --image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
+          gcloud run deploy $SERVICE_NAME --image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
           --platform managed \
           --allow-unauthenticated \
-          --memory 256M
+          --memory 256M \
+          --max-instances 1
