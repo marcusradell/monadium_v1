@@ -43,7 +43,7 @@ jobs:
         run: |
           gcloud run deploy $SERVICE_NAME --image eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
           --platform managed \
-          --region europe-north1
+          --region europe-north1 \
           --allow-unauthenticated \
           --memory 256M \
           --max-instances 1
