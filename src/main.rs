@@ -20,10 +20,10 @@ async fn hello() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    println!("Starting server...");
+    println!("Server starting.");
     HttpServer::new(|| {
         App::new()
-            .service(web::scope("/api").service(identity::controller))
+            .service(web::scope("/api").configure(identity::schema))
             .service(hello)
             .service(live)
             .service(ready)
