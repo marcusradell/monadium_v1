@@ -1,32 +1,16 @@
+mod health;
 mod identity;
-use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
-
-#[get("/ready")]
-async fn ready() -> impl Responder {
-    HttpResponse::Ok()
-}
-
-#[get("/live")]
-async fn live() -> impl Responder {
-    HttpResponse::Ok()
-}
-
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok()
-        .content_type("text/html")
-        .body("<H1>Hello Monadium!</H2>")
-}
+use actix_web::{web, App, HttpServer};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     println!("Server starting.");
     HttpServer::new(|| {
-        App::new()
-            .service(web::scope("/api").configure(identity::schema))
-            .service(hello)
-            .service(live)
-            .service(ready)
+        App::new().service(
+            web::scope("/api")
+                .configure(identity::schema)
+                .configure(health::schema),
+        )
     })
     .bind("0.0.0.0:8080")?
     .run()
