@@ -3,7 +3,7 @@ use serde;
 
 #[derive(serde::Serialize)]
 enum Status {
-    Live,
+    // Live,
     Ready,
 }
 
