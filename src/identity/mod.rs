@@ -1,26 +1,14 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web, Result};
 use serde;
 
-#[derive(serde::Serialize)]
-pub struct Err {
-    code: &'static str,
+#[derive(serde::Deserialize)]
+pub struct SignUpBody {
+    email: String,
 }
 
-#[derive(serde::Serialize)]
-pub struct SignUpWithEmailResult {
-    ok: bool,
-    error: Err,
-}
-
-pub async fn sign_up() -> impl Responder {
-    let result = SignUpWithEmailResult {
-        ok: false,
-        error: Err { code: "failed" },
-    };
-
-    HttpResponse::Ok()
-        .content_type("application/json")
-        .body(serde_json::to_string(&result).unwrap())
+pub async fn sign_up(args: web::Json<SignUpBody>) -> Result<&'static str> {
+    println!("sign_up called with email: {}", args.email);
+    Ok("Not implemented")
 }
 
 pub fn schema(cfg: &mut web::ServiceConfig) {
