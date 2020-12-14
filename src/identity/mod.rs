@@ -8,7 +8,7 @@ pub struct SignUpBody {
 
 pub async fn sign_up(args: web::Json<SignUpBody>) -> Result<&'static str> {
     println!("sign_up called with email: {}", args.email);
-    Ok("Not implemented")
+    Ok("TODO")
 }
 
 pub fn schema(cfg: &mut web::ServiceConfig) {
