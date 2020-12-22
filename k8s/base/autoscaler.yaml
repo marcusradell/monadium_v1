@@ -1,0 +1,19 @@
+apiVersion: "autoscaling/v2beta1"
+kind: "HorizontalPodAutoscaler"
+metadata:
+  name: "monadium-autoscaler"
+  namespace: "default"
+  labels:
+    app: "monadium"
+spec:
+  scaleTargetRef:
+    kind: "Deployment"
+    name: "monadium"
+    apiVersion: "apps/v1"
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: "Resource"
+      resource:
+        name: "cpu"
+        targetAverageUtilization: 80
