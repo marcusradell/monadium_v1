@@ -70,7 +70,7 @@ pub fn schema(cfg: &mut web::ServiceConfig) {
 
     cfg.service(
         web::scope("/health")
-            .app_data(data.clone())
+            .app_data(data)
             .service(web::resource("/live").route(web::get().to(live)))
             .service(web::resource("/ready").route(web::get().to(ready)))
             .service(web::resource("/status").route(web::get().to(status)))
