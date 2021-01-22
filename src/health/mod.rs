@@ -1,6 +1,7 @@
 use actix_web::{web, HttpResponse, Responder};
 use serde;
 use std::sync::Mutex;
+use std::sync::MutexGuard;
 
 #[derive(serde::Serialize, Copy, Clone, Debug)]
 pub enum Status {
@@ -25,13 +26,8 @@ impl Health {
         }
     }
 
-    // pub fn mut_ready(&mut self) {
-    //     let mut status = self.status.lock().unwrap();
-    //     self.status = Mutex::new(Status::Ready);
-    // }
-
-    pub fn status(&self) -> Status {
-        *self.status.lock().unwrap()
+    pub fn status(&self) -> MutexGuard<Status> {
+        self.status.lock().unwrap()
     }
 }
 
@@ -52,14 +48,12 @@ async fn ready(data: web::Data<Health>) -> impl Responder {
 async fn status(data: web::Data<Health>) -> impl Responder {
     HttpResponse::Ok()
         .content_type("application/json")
-        .body(serde_json::to_string(&data.status()).unwrap())
+        .body(serde_json::to_string(&*data.status()).unwrap())
 }
 
 async fn set_status(data: web::Data<Health>) -> impl Responder {
-    // data.mut_ready();
-    let mut status = data.status.lock().unwrap();
+    let mut status = data.status();
     *status = Status::Ready;
-    println!("{:?}", status);
     HttpResponse::Ok()
 }
 
