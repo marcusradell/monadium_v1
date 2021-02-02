@@ -3,7 +3,7 @@ use serde;
 use std::sync::Mutex;
 use std::sync::MutexGuard;
 
-#[derive(serde::Serialize, Copy, Clone, Debug)]
+#[derive(serde::Serialize, Debug)]
 pub enum Status {
     Live,
     Ready,
@@ -51,7 +51,8 @@ async fn status(data: web::Data<Health>) -> impl Responder {
         .body(serde_json::to_string(&*data.status()).unwrap())
 }
 
-async fn set_status(data: web::Data<Health>) -> impl Responder {
+// TODO: remove and call when server has loaded.
+async fn set_ready(data: web::Data<Health>) -> impl Responder {
     let mut status = data.status();
     *status = Status::Ready;
     HttpResponse::Ok()
@@ -68,6 +69,7 @@ pub fn schema(cfg: &mut web::ServiceConfig) {
             .service(web::resource("/live").route(web::get().to(live)))
             .service(web::resource("/ready").route(web::get().to(ready)))
             .service(web::resource("/status").route(web::get().to(status)))
-            .service(web::resource("/set_status").route(web::get().to(set_status))),
+            // TODO: remove and call when server has loaded.
+            .service(web::resource("/set_ready").route(web::get().to(set_ready))),
     );
 }
