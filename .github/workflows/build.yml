@@ -58,3 +58,4 @@ jobs:
           --allow-unauthenticated \
           --memory 256M \
           --max-instances 1
+          --set-env-vars "DATABASE_URL=${{ secrets.DATABASE_URL }}"
