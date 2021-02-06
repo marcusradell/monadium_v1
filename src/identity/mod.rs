@@ -18,12 +18,11 @@ pub fn create_post<'a>(conn: &PgConnection, email: &'a str, password_hash: &'a s
 }
 
 #[derive(serde::Deserialize)]
-pub struct SignUpBody {
+pub struct SignUpArgs {
     email: String,
 }
 
-pub async fn sign_up(args: web::Json<SignUpBody>) -> Result<&'static str> {
-    println!("sign_up called with email: {}", args.email);
+pub async fn sign_up(args: web::Json<SignUpArgs>) -> Result<&'static str> {
     Ok("TODO")
 }
 
