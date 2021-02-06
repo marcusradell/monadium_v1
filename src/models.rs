@@ -1,4 +1,6 @@
-#[derive(Queryable)]
+use serde::Serialize;
+
+#[derive(Queryable, Serialize)]
 pub struct Identity {
     pub id: i32,
     pub email: String,
