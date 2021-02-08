@@ -1,9 +1,7 @@
 use crate::db;
 use crate::models;
-use crate::schema::identity;
 use crate::schema::identity::dsl;
 use actix_web::{web, Error, HttpResponse, Result};
-use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use serde;
 
