@@ -1,6 +1,6 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Serialize)]
+#[derive(Queryable, Serialize, Deserialize, Debug)]
 pub struct Identity {
     pub id: i32,
     pub email: String,
@@ -9,7 +9,7 @@ pub struct Identity {
 
 use super::schema::identity;
 
-#[derive(Insertable)]
+#[derive(Insertable, Debug)]
 #[table_name = "identity"]
 pub struct NewIdentity<'a> {
     pub email: &'a str,
