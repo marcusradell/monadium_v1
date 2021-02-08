@@ -5,8 +5,6 @@ use actix_web::{middleware, web, App, HttpServer};
 mod db;
 mod health;
 mod identity;
-mod models;
-mod schema;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
