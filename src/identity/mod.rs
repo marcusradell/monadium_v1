@@ -7,22 +7,6 @@ use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use serde;
 
-pub fn create_post<'a>(
-    conn: &PgConnection,
-    email: &'a str,
-    password_hash: &'a str,
-) -> models::Identity {
-    let new_identity = models::NewIdentity {
-        email,
-        password_hash,
-    };
-
-    diesel::insert_into(identity::table)
-        .values(&new_identity)
-        .get_result(conn)
-        .expect("Error saving new identity.")
-}
-
 #[derive(serde::Deserialize)]
 pub struct SignUpArgs {
     email: String,
