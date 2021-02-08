@@ -11,7 +11,7 @@ async fn ready() -> impl Responder {
 pub fn schema(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/health")
-            .service(web::resource("/live").route(web::get().to(live)))
-            .service(web::resource("/ready").route(web::get().to(ready))),
+            .route("/live", web::get().to(live))
+            .route("/ready", web::get().to(ready)),
     );
 }

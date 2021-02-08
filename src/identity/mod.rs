@@ -67,7 +67,7 @@ async fn list(pool: web::Data<db::Pool>) -> Result<HttpResponse, Error> {
 pub fn schema(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/identity")
-            .service(web::resource("/sign_up").route(web::post().to(sign_up)))
-            .service(web::resource("/list").route(web::get().to(list))),
+            .route("/sign_up", web::post().to(sign_up))
+            .route("/list", web::get().to(list)),
     );
 }
