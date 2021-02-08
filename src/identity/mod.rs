@@ -5,7 +5,7 @@ use actix_web::{web, Error, HttpResponse, Result};
 use diesel::prelude::*;
 use serde;
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Debug)]
 pub struct SignUpArgs {
     email: String,
 }
