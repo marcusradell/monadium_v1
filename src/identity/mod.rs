@@ -4,7 +4,7 @@ pub mod models;
 mod new;
 pub mod schema;
 
-pub fn schema(cfg: &mut web::ServiceConfig) {
+pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/identity")
             .route("/new", web::post().to(new::new))
