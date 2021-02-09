@@ -1,13 +1,11 @@
 #[macro_use]
 extern crate diesel;
 extern crate dotenv;
-mod db;
-mod health;
-mod http;
-mod identity;
+mod app;
+mod io;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let db_pool = db::init();
-    http::init(db_pool).await
+    let db_pool = io::db::init();
+    io::http::init(db_pool).await
 }

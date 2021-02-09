@@ -1,6 +1,6 @@
-use crate::db;
-use crate::health;
-use crate::identity;
+use crate::app::health;
+use crate::app::identity;
+use crate::io::db;
 use actix_web::{middleware, web, App, HttpServer};
 
 pub async fn init(db_pool: db::Pool) -> std::io::Result<()> {
