@@ -1,8 +1,8 @@
 use actix_web::web;
 mod list;
-pub mod models;
+mod models;
 mod new;
-pub mod schema;
+mod schema;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
