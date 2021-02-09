@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate diesel;
+extern crate argon2;
 extern crate dotenv;
 mod app;
 mod io;
