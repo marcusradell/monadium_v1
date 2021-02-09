@@ -7,5 +7,10 @@ mod io;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let db_pool = io::db::init();
-    io::http::init(db_pool).await
+
+    io::http::init(
+        db_pool,
+        vec![app::health::configure, app::identity::configure],
+    )
+    .await
 }
