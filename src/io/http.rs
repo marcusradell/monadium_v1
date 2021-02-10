@@ -19,6 +19,7 @@ pub async fn init(
             .wrap(middleware::Logger::default())
             .service(scope)
     })
+    .workers(1)
     .bind("0.0.0.0:8080")?
     .run();
 
