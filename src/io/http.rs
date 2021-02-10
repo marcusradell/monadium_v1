@@ -1,8 +1,10 @@
 use crate::io::db;
+use crate::io::jwt;
 use actix_web::{middleware, web, App, HttpServer};
 
 pub async fn init(
     db_pool: db::Pool,
+    jwt: jwt::Jwt,
     configure_list: Vec<fn(&mut web::ServiceConfig)>,
 ) -> std::io::Result<()> {
     let server = HttpServer::new(move || {
@@ -13,6 +15,7 @@ pub async fn init(
         }
         App::new()
             .data(db_pool.clone())
+            .data(jwt.clone())
             .wrap(middleware::Logger::default())
             .service(scope)
     })

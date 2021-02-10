@@ -7,7 +7,7 @@ struct Claims {
     exp: usize,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Jwt {
     secret: String,
 }
