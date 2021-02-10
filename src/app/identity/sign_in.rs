@@ -24,5 +24,6 @@ pub async fn sign_in(
         false => println!("You didn't send the 'test1' password."),
     };
 
+    // TODO: sign a jsonwebtoken: https://crates.io/crates/jsonwebtoken
     Ok(HttpResponse::Ok().finish())
 }
