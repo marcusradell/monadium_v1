@@ -1,6 +1,6 @@
 use super::models;
 use super::schema::identity::dsl;
-use crate::io::db;
+use crate::io::db_old;
 use actix_web::{web, Error, HttpResponse};
 use argon2::Config;
 use diesel::prelude::*;
@@ -13,7 +13,7 @@ pub struct SignUpArgs {
 }
 
 pub async fn new(
-    pool: web::Data<db::Pool>,
+    pool: web::Data<db_old::Pool>,
     args: web::Json<SignUpArgs>,
 ) -> Result<HttpResponse, Error> {
     let conn = pool.get().expect("Couldn't get DB connection from pool.");

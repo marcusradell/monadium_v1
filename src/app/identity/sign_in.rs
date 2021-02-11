@@ -1,4 +1,4 @@
-use crate::io::db;
+use crate::io::db_old;
 use crate::io::jwt;
 use actix_web::{web, Error, HttpResponse};
 
@@ -14,7 +14,7 @@ struct SignInResponse {
 }
 
 pub async fn sign_in(
-    pool: web::Data<db::Pool>,
+    pool: web::Data<db_old::Pool>,
     jwt: web::Data<jwt::Jwt>,
     args: web::Json<SignInArgs>,
 ) -> Result<HttpResponse, Error> {

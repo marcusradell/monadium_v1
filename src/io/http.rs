@@ -1,9 +1,9 @@
-use crate::io::db;
+use crate::io::db_old;
 use crate::io::jwt;
 use actix_web::{middleware, web, App, HttpServer};
 
 pub async fn init(
-    db_pool: db::Pool,
+    db_pool: db_old::Pool,
     jwt: jwt::Jwt,
     configure_list: Vec<fn(&mut web::ServiceConfig)>,
 ) -> std::io::Result<()> {
