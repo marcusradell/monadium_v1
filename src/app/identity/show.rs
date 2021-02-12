@@ -16,7 +16,7 @@ pub async fn show(pool: web::Data<db::Pool>, args: web::Query<Args>) -> Result<H
     let result = web::block(move || {
         dsl::identity
             .filter(email.eq(args.email.clone()))
-            .load::<models::Identity>(&conn)
+            .first::<models::Identity>(&conn)
     })
     .await
     .map_err(|e| {
