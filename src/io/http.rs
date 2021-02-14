@@ -18,6 +18,7 @@ pub async fn init(
             .data(db_pool.clone())
             .data(jwt.clone())
             .wrap(middleware::Logger::default())
+            .data(web::JsonConfig::default().limit(4096))
             .service(scope)
     })
     .bind(address)?
