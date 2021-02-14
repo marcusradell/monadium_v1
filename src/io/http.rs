@@ -5,6 +5,7 @@ use actix_web::{middleware, web, App, HttpServer};
 pub async fn init(
     db_pool: db::Pool,
     jwt: jwt::Jwt,
+    address: String,
     configure_list: Vec<fn(&mut web::ServiceConfig)>,
 ) -> std::io::Result<()> {
     let server = HttpServer::new(move || {
@@ -19,7 +20,7 @@ pub async fn init(
             .wrap(middleware::Logger::default())
             .service(scope)
     })
-    .bind("0.0.0.0:8080")?
+    .bind(address)?
     .run();
 
     println!("Server started.");

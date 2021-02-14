@@ -16,6 +16,7 @@ async fn main() -> std::io::Result<()> {
     io::http::init(
         db_pool,
         jwt,
+        String::from("0.0.0.0:8080"),
         vec![app::health::configure, app::identity::configure],
     )
     .await
