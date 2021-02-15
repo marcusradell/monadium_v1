@@ -5,6 +5,7 @@ pub struct Identity {
     pub id: i32,
     pub email: String,
     pub password_hash: String,
+    pub created_at: chrono::NaiveDateTime,
 }
 
 use super::schema::identity;
