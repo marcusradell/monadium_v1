@@ -11,6 +11,9 @@ mod io;
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
+    std::env::set_var("RUST_LOG", "actix_web=info,actix_server=info");
+    env_logger::init();
+
     let db_pool = io::db::init();
     let jwt = io::jwt::Jwt::new(String::from("todo_set_as_env_var"));
 
