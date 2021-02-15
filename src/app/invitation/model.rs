@@ -1,4 +1,4 @@
-use super::schema::*;
+use crate::schema::*;
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Queryable, Insertable)]
 #[table_name = "invitation"]

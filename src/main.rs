@@ -6,6 +6,7 @@ use dotenv::dotenv;
 mod app;
 mod errors;
 mod io;
+mod schema;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

@@ -1,6 +1,6 @@
 use super::model;
-use super::schema::identity::dsl;
 use crate::io::db;
+use crate::schema::identity::dsl;
 use actix_web::{web, Error, HttpResponse};
 use argon2::Config;
 use diesel::prelude::*;

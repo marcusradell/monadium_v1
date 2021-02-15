@@ -2,7 +2,6 @@ use actix_web::web;
 mod list;
 mod model;
 mod new;
-mod schema;
 mod show;
 mod sign_in;
 

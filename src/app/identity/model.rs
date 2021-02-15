@@ -8,7 +8,7 @@ pub struct Identity {
     pub created_at: chrono::NaiveDateTime,
 }
 
-use super::schema::identity;
+use crate::schema::identity;
 
 #[derive(Insertable, Debug)]
 #[table_name = "identity"]

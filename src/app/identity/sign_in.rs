@@ -1,7 +1,7 @@
 use super::model;
-use super::schema::identity::dsl;
 use crate::io::db;
 use crate::io::jwt;
+use crate::schema::identity::dsl::*;
 use actix_web::{web, Error, HttpResponse};
 use diesel::prelude::*;
 
@@ -21,12 +21,11 @@ pub async fn sign_in(
     jwt: web::Data<jwt::Jwt>,
     args: web::Json<SignInArgs>,
 ) -> Result<HttpResponse, Error> {
-    use super::schema::identity::dsl::*;
     let conn = pool.get().expect("Couldn't get DB connection from pool.");
 
     let cloned_args = args.clone();
     let identity_by_email = web::block(move || {
-        dsl::identity
+        identity
             .filter(email.eq(cloned_args.email))
             .first::<model::Identity>(&conn)
     })
