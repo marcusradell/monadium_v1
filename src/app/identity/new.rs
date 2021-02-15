@@ -32,6 +32,7 @@ pub async fn new(
             .values(model::NewIdentity {
                 email: &args.email,
                 password_hash: &password_hash,
+                created_at: chrono::Local::now().naive_local(),
             })
             .execute(&conn)
     })

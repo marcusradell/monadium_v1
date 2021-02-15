@@ -15,4 +15,5 @@ use crate::schema::identity;
 pub struct NewIdentity<'a> {
     pub email: &'a str,
     pub password_hash: &'a str,
+    pub created_at: chrono::NaiveDateTime,
 }
