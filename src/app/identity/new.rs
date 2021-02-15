@@ -1,4 +1,4 @@
-use super::models;
+use super::model;
 use super::schema::identity::dsl;
 use crate::io::db;
 use actix_web::{web, Error, HttpResponse};
@@ -29,7 +29,7 @@ pub async fn new(
 
     web::block(move || {
         diesel::insert_into(dsl::identity)
-            .values(models::NewIdentity {
+            .values(model::NewIdentity {
                 email: &args.email,
                 password_hash: &password_hash,
             })

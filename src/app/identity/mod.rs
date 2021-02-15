@@ -1,6 +1,6 @@
 use actix_web::web;
 mod list;
-mod models;
+mod model;
 mod new;
 mod schema;
 mod show;

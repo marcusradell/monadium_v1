@@ -1,4 +1,4 @@
-use super::models;
+use super::model;
 use super::schema::identity::dsl;
 use crate::io::db;
 use crate::io::jwt;
@@ -28,7 +28,7 @@ pub async fn sign_in(
     let identity_by_email = web::block(move || {
         dsl::identity
             .filter(email.eq(cloned_args.email))
-            .first::<models::Identity>(&conn)
+            .first::<model::Identity>(&conn)
     })
     .await
     .map_err(|e| {

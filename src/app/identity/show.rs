@@ -1,4 +1,4 @@
-use super::models;
+use super::model;
 use super::schema::identity::dsl;
 use crate::io::db;
 use actix_web::{web, HttpResponse, Result};
@@ -16,7 +16,7 @@ pub async fn show(pool: web::Data<db::Pool>, args: web::Query<Args>) -> Result<H
     let result = web::block(move || {
         dsl::identity
             .filter(email.eq(args.email.clone()))
-            .first::<models::Identity>(&conn)
+            .first::<model::Identity>(&conn)
     })
     .await
     .map_err(|e| {
