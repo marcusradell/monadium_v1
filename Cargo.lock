@@ -1114,6 +1114,7 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "chrono",
+ "derive_more",
  "diesel",
  "dotenv",
  "env_logger",
