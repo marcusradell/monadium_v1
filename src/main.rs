@@ -4,7 +4,6 @@ extern crate argon2;
 extern crate dotenv;
 use dotenv::dotenv;
 mod app;
-mod errors;
 mod io;
 mod schema;
 

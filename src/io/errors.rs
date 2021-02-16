@@ -22,24 +22,3 @@ impl ResponseError for ServiceError {
         }
     }
 }
-
-impl From<uuid::Error> for ServiceError {
-    fn from(_: uuid::Error) -> ServiceError {
-        ServiceError::BadRequest("Invalid UUID".into())
-    }
-}
-
-impl From<diesel::result::Error> for ServiceError {
-    fn from(error: diesel::result::Error) -> ServiceError {
-        match error {
-            diesel::result::Error::DatabaseError(kind, info) => {
-                if let diesel::result::DatabaseErrorKind::UniqueViolation = kind {
-                    let message = info.details().unwrap_or_else(|| info.message()).to_string();
-                    return ServiceError::BadRequest(message);
-                }
-                ServiceError::InternalServerError
-            }
-            _ => ServiceError::InternalServerError,
-        }
-    }
-}
