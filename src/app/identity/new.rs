@@ -36,11 +36,7 @@ pub async fn new(
             })
             .execute(&conn)
     })
-    .await
-    .map_err(|e| {
-        eprintln!("{}", e);
-        HttpResponse::InternalServerError().finish()
-    })?;
+    .await?;
 
     Ok(HttpResponse::Ok().finish())
 }
