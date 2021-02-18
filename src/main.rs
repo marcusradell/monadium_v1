@@ -15,12 +15,12 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     let db_pool = io::db::init();
-    let jwt = io::jwt::Jwt::new(String::from("todo_set_as_env_var"));
+    let jwt = io::jwt::Jwt::new("todo_set_as_env_var".into());
 
     io::http::init(
         db_pool,
         jwt,
-        String::from("0.0.0.0:8080"),
+        "0.0.0.0:8080".into(),
         vec![app::health::configure, app::identity::configure],
     )
     .await
