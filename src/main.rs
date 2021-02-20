@@ -15,7 +15,8 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     let db_pool = io::db::init();
-    let jwt = io::jwt::Jwt::new("todo_set_as_env_var".into());
+
+    let jwt = io::jwt::Jwt::new();
 
     io::http::init(
         db_pool,

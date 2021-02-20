@@ -1,5 +1,6 @@
 use jsonwebtoken::{EncodingKey, Header};
 use serde::{Deserialize, Serialize};
+use std::env;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
@@ -13,8 +14,12 @@ pub struct Jwt {
 }
 
 impl Jwt {
-    pub fn new(secret: String) -> Self {
-        Jwt { secret }
+    pub fn new() -> Self {
+        let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set.");
+
+        Jwt {
+            secret: jwt_secret.into(),
+        }
     }
 
     pub fn encode(&self, email: String) -> Result<String, jsonwebtoken::errors::Error> {
