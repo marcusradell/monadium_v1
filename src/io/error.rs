@@ -18,7 +18,8 @@ impl ResponseError for Error {
             Error::InternalServerError => HttpResponse::InternalServerError()
                 .json("Internal Server Error; please try again later."),
             Error::BadRequest(ref message) => HttpResponse::BadRequest().json(message),
-            Error::Unauthorized => HttpResponse::Unauthorized().json("Unauthorized"),
+            Error::Unauthorized => HttpResponse::Unauthorized()
+                .json("Unauthorized; please sign in with an authorized account."),
         }
     }
 }
