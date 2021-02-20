@@ -3,7 +3,7 @@ use actix_web::ResponseError;
 use derive_more::Display;
 
 #[derive(Debug, Display)]
-pub enum ServiceError {
+pub enum Error {
     #[display(fmt = "Internal Server Error")]
     InternalServerError,
     #[display(fmt = "Bad Request: {}", _0)]
@@ -12,13 +12,13 @@ pub enum ServiceError {
     Unauthorized,
 }
 
-impl ResponseError for ServiceError {
+impl ResponseError for Error {
     fn error_response(&self) -> HttpResponse {
         match self {
-            ServiceError::InternalServerError => HttpResponse::InternalServerError()
+            Error::InternalServerError => HttpResponse::InternalServerError()
                 .json("Internal Server Error; please try again later."),
-            ServiceError::BadRequest(ref message) => HttpResponse::BadRequest().json(message),
-            ServiceError::Unauthorized => HttpResponse::Unauthorized().json("Unauthorized"),
+            Error::BadRequest(ref message) => HttpResponse::BadRequest().json(message),
+            Error::Unauthorized => HttpResponse::Unauthorized().json("Unauthorized"),
         }
     }
 }

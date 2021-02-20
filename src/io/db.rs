@@ -1,4 +1,4 @@
-use super::errors::ServiceError;
+use super::error::Error;
 use diesel::prelude::*;
 use std::env;
 
@@ -14,17 +14,17 @@ pub fn init() -> r2d2::Pool<ConnectionManager<PgConnection>> {
         .expect("Failed to create DB pool.")
 }
 
-impl From<diesel::result::Error> for ServiceError {
-    fn from(error: diesel::result::Error) -> ServiceError {
+impl From<diesel::result::Error> for Error {
+    fn from(error: diesel::result::Error) -> Error {
         match error {
             diesel::result::Error::DatabaseError(kind, info) => {
                 if let diesel::result::DatabaseErrorKind::UniqueViolation = kind {
                     let message = info.details().unwrap_or_else(|| info.message()).to_string();
-                    return ServiceError::BadRequest(message);
+                    return Error::BadRequest(message);
                 }
-                ServiceError::InternalServerError
+                Error::InternalServerError
             }
-            _ => ServiceError::InternalServerError,
+            _ => Error::InternalServerError,
         }
     }
 }

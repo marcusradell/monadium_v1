@@ -1,7 +1,7 @@
-use super::errors::ServiceError;
+use super::error::Error;
 
-impl From<uuid::Error> for ServiceError {
-    fn from(_: uuid::Error) -> ServiceError {
-        ServiceError::BadRequest("Invalid UUID".into())
+impl From<uuid::Error> for Error {
+    fn from(_: uuid::Error) -> Error {
+        Error::BadRequest("Invalid UUID".into())
     }
 }
