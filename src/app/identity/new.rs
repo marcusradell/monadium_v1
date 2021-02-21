@@ -1,8 +1,9 @@
 use super::model;
 use crate::io::db;
+use crate::io::error::Error;
 use crate::io::password;
 use crate::schema::identity::dsl;
-use actix_web::{web, Error, HttpResponse};
+use actix_web::{web, HttpResponse};
 use diesel::prelude::*;
 
 #[derive(serde::Deserialize, Debug)]
@@ -15,8 +16,7 @@ pub async fn new(
     pool: web::Data<db::Pool>,
     args: web::Json<SignUpArgs>,
 ) -> Result<HttpResponse, Error> {
-    let conn = pool.get().expect("Couldn't get DB connection from pool.");
-
+    let conn = pool.get()?;
     let password_hash = password::hash(&args.password)?;
 
     web::block(move || {

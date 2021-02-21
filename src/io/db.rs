@@ -1,8 +1,9 @@
 use super::error::Error;
+use actix_web::error::BlockingError;
 use diesel::prelude::*;
 use std::env;
 
-use diesel::r2d2::{self, ConnectionManager};
+use diesel::r2d2::{self, ConnectionManager, PoolError};
 
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
@@ -14,8 +15,20 @@ pub fn init() -> r2d2::Pool<ConnectionManager<PgConnection>> {
         .expect("Failed to create DB pool.")
 }
 
-impl From<diesel::result::Error> for Error {
-    fn from(_error: diesel::result::Error) -> Error {
+impl From<PoolError> for Error {
+    fn from(_error: PoolError) -> Error {
+        Error::InternalServerError
+    }
+}
+
+impl From<BlockingError<diesel::result::Error>> for Error {
+    fn from(_error: BlockingError<diesel::result::Error>) -> Error {
+        Error::InternalServerError
+    }
+}
+
+impl From<r2d2::Error> for Error {
+    fn from(_error: r2d2::Error) -> Error {
         Error::InternalServerError
     }
 }
