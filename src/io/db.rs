@@ -15,16 +15,7 @@ pub fn init() -> r2d2::Pool<ConnectionManager<PgConnection>> {
 }
 
 impl From<diesel::result::Error> for Error {
-    fn from(error: diesel::result::Error) -> Error {
-        match error {
-            diesel::result::Error::DatabaseError(kind, info) => {
-                if let diesel::result::DatabaseErrorKind::UniqueViolation = kind {
-                    let message = info.details().unwrap_or_else(|| info.message()).to_string();
-                    return Error::BadRequest(message);
-                }
-                Error::InternalServerError
-            }
-            _ => Error::InternalServerError,
-        }
+    fn from(_error: diesel::result::Error) -> Error {
+        Error::InternalServerError
     }
 }
