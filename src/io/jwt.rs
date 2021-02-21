@@ -1,3 +1,4 @@
+use super::error::Error;
 use jsonwebtoken::{EncodingKey, Header};
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -29,5 +30,11 @@ impl Jwt {
             &Claims { email, exp: 10 },
             &EncodingKey::from_secret(self.secret.as_ref()),
         )
+    }
+}
+
+impl From<jsonwebtoken::errors::Error> for Error {
+    fn from(_error: jsonwebtoken::errors::Error) -> Error {
+        Error::InternalServerError
     }
 }
