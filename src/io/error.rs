@@ -8,8 +8,6 @@ pub enum Error {
     InternalServerError,
     #[display(fmt = "Bad Request: {}", _0)]
     BadRequest(String),
-    #[display(fmt = "Unauthorized")]
-    Unauthorized,
 }
 
 impl ResponseError for Error {
@@ -18,8 +16,6 @@ impl ResponseError for Error {
             Error::InternalServerError => HttpResponse::InternalServerError()
                 .json("Internal Server Error; please try again later."),
             Error::BadRequest(ref message) => HttpResponse::BadRequest().json(message),
-            Error::Unauthorized => HttpResponse::Unauthorized()
-                .json("Unauthorized; please sign in with an authorized account."),
         }
     }
 }
