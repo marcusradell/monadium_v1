@@ -1,10 +1,9 @@
 use super::model;
 use crate::io::db;
+use crate::io::password;
 use crate::schema::identity::dsl;
 use actix_web::{web, Error, HttpResponse};
-use argon2::Config;
 use diesel::prelude::*;
-use rand::Rng;
 
 #[derive(serde::Deserialize, Debug)]
 pub struct SignUpArgs {
@@ -18,14 +17,7 @@ pub async fn new(
 ) -> Result<HttpResponse, Error> {
     let conn = pool.get().expect("Couldn't get DB connection from pool.");
 
-    let salt: [u8; 32] = rand::thread_rng().gen();
-    let config = Config::default();
-
-    let password_hash =
-        argon2::hash_encoded(args.password.as_bytes(), &salt, &config).map_err(|e| {
-            eprintln!("{}", e);
-            HttpResponse::InternalServerError().finish()
-        })?;
+    let password_hash = password::hash(&args.password)?;
 
     web::block(move || {
         diesel::insert_into(dsl::identity)
