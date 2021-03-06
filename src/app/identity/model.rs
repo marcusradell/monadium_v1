@@ -5,6 +5,7 @@ pub struct Identity {
     pub id: i32,
     pub email: String,
     pub password_hash: String,
+    pub role: String,
     pub created_at: chrono::NaiveDateTime,
 }
 
@@ -15,5 +16,6 @@ use crate::schema::identity;
 pub struct NewIdentity<'a> {
     pub email: &'a str,
     pub password_hash: &'a str,
+    pub role: &'a str,
     pub created_at: chrono::NaiveDateTime,
 }
