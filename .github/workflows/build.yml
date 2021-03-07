@@ -59,4 +59,6 @@ jobs:
           --memory 256M \
           --max-instances 1 \
           --set-env-vars "DATABASE_URL=${{ secrets.DATABASE_URL }}" \
-          --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }}"
+          --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
+          --set-env-vars "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" \
+          --set-env-vars "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}"

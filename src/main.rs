@@ -22,7 +22,6 @@ async fn main() -> std::io::Result<()> {
 
     let admin_email = env::var("ADMIN_EMAIL").expect("Missing env ADMIN_EMAIL.");
 
-    // TODO: Only run when no admin exists, or it will crash.
     let admin_identity = app::identity::show::show(
         web::Data::new(db_pool.clone()),
         web::Query::from_query(&format!("email={}", admin_email)).unwrap(),
