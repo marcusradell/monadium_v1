@@ -38,6 +38,14 @@ pub async fn new_member(
     new(pool.get_ref().clone(), args.into_inner(), "MEMBER".into()).await
 }
 
-pub async fn new_admin(pool: db::Pool, args: SignUpArgs) -> Result<HttpResponse, Error> {
-    new(pool, args, "ADMINISTRATOR".into()).await
+pub async fn new_admin(
+    pool: web::Data<db::Pool>,
+    args: web::Json<SignUpArgs>,
+) -> Result<HttpResponse, Error> {
+    new(
+        pool.get_ref().clone(),
+        args.into_inner(),
+        "ADMINISTRATOR".into(),
+    )
+    .await
 }
