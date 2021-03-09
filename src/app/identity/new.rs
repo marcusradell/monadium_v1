@@ -38,7 +38,7 @@ pub async fn new_member(
     new(pool.get_ref().clone(), args.into_inner(), "MEMBER".into()).await
 }
 
-pub async fn new_admin(
+pub async fn new_administrator(
     pool: web::Data<db::Pool>,
     args: web::Json<SignUpArgs>,
 ) -> Result<HttpResponse, Error> {
