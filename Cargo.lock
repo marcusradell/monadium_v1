@@ -286,6 +286,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "app"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "chrono",
+ "derive_more",
+ "diesel",
+ "dotenv",
+ "env_logger",
+ "jsonwebtoken",
+ "r2d2",
+ "rand 0.8.3",
+ "rust-argon2",
+ "serde",
+ "serde_json",
+ "uuid",
+]
+
+[[package]]
 name = "arrayref"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1106,25 +1125,6 @@ dependencies = [
  "net2",
  "winapi 0.2.8",
  "ws2_32-sys",
-]
-
-[[package]]
-name = "monadium"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "chrono",
- "derive_more",
- "diesel",
- "dotenv",
- "env_logger",
- "jsonwebtoken",
- "r2d2",
- "rand 0.8.3",
- "rust-argon2",
- "serde",
- "serde_json",
- "uuid",
 ]
 
 [[package]]

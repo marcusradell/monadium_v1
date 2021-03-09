@@ -1,5 +1,5 @@
 [package]
-name = "monadium"
+name = "app"
 version = "0.1.0"
 authors = ["Marcus Rådell <marcus.radell@sveasolar.com>"]
 edition = "2018"
