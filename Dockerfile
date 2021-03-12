@@ -22,7 +22,7 @@ COPY --from=cacher /app/target target
 COPY --from=cacher /usr/local/cargo /usr/local/cargo
 RUN cargo build --release --bin app
 
-FROM rust:slim as runtime
+FROM rust:1.50.0-slim as runtime
 WORKDIR /app
 RUN apt-get update && apt-get -y install libpq-dev && rm -rf /var/lib/apt/lists/* 
 COPY --from=builder /app/target/release/app /usr/local/bin
