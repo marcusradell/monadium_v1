@@ -20,6 +20,7 @@ jobs:
         id: buildx
         with:
           install: true
+
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
@@ -27,6 +28,7 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+
       - name: Cargo Cache
         uses: actions/cache@v1
         with:
@@ -45,7 +47,7 @@ jobs:
             ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
             ${{ runner.os }}-cargo-target
 
-      - name: Run tests
+      - name: Cargo Test
         run: cargo test
 
       # Setup gcloud CLI
@@ -56,20 +58,20 @@ jobs:
           export_default_credentials: true
 
       # Build docker image
-      - name: Image
+      - name: Docker Build
         run: |-
-          docker build -t eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA .
+          docker build --load -t eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA .
 
       # Configure docker to use the gcloud command-line tool as a credential helper
       - run: |
           gcloud auth configure-docker -q
 
       # Push image to Google Container Registry
-      - name: Build
+      - name: Docker Push
         run: |-
           docker push eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
 
-      - name: Deploy
+      - name: Cloud Run Deploy
         run: |
           gcloud run deploy $SERVICE_NAME --image eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
           --platform managed \
