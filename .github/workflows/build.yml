@@ -57,10 +57,24 @@ jobs:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
           export_default_credentials: true
 
-      # Build docker image
+      # And make it available for the builds
       - name: Docker Build
-        run: |-
-          docker build --load -t eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA .
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          tags: eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+        # This ugly bit is necessary if you don't want your cache to grow forever
+        # till it hits GitHub's limit of 5GB.
+        # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       # Configure docker to use the gcloud command-line tool as a credential helper
       - run: |
