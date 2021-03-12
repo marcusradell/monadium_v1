@@ -44,6 +44,11 @@ jobs:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
           export_default_credentials: true
 
+      - uses: docker/setup-buildx-action@v1
+        id: buildx
+        with:
+          install: true
+
       # Build docker image
       - name: Image
         run: |-
