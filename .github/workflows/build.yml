@@ -16,6 +16,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: docker/setup-buildx-action@v1
+        id: buildx
+        with:
+          install: true
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
       - name: Cargo Cache
         uses: actions/cache@v1
         with:
@@ -43,11 +54,6 @@ jobs:
           service_account_key: ${{ secrets.GCLOUD_SERVICE_KEY }}
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
           export_default_credentials: true
-
-      - uses: docker/setup-buildx-action@v1
-        id: buildx
-        with:
-          install: true
 
       # Build docker image
       - name: Image
