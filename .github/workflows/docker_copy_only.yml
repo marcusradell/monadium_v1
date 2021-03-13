@@ -12,21 +12,20 @@ jobs:
       - name: Clone Repo
         uses: actions/checkout@v2
 
-      - name: Cargo Cache
-        id: cache
-        uses: actions/cache@v2
+      - uses: actions-rs/toolchain@v1
         with:
-          path: |
-            ~/.cargo
-            target
-          key: cargo-${{ hashFiles('Cargo.lock') }}
+          profile: minimal
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@v1
+        id: cache
 
       - name: Echo Cache Hit
-        if: steps.echo.outputs.cache-hit == 'true'
+        if: steps.cache.outputs.cache-hit == 'true'
         run: echo Cache-hit
 
       - name: Echo Cache Miss
-        if: steps.echo.outputs.cache-hit == 'false'
+        if: steps.cache.outputs.cache-hit == 'false'
         run: echo Cache-miss
 
       - name: Build
