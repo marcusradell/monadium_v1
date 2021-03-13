@@ -42,7 +42,7 @@ jobs:
 
       # Configure docker to use the gcloud command-line tool as a credential helper
       - name: GCloud Auth Docker
-      - run: |
+        run: |
           gcloud auth configure-docker -q
 
       - name: Docker Build
