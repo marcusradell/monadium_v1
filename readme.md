@@ -1,6 +1,6 @@
 # Monadium
 
-A modular web service written in Rust.
+A modular web service written in Rust!
 
 ## Structure
 
