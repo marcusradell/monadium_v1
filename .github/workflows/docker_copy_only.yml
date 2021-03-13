@@ -13,13 +13,15 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Cargo Cache
+        id: cache
         uses: actions/cache@v1
         with:
           path: |
             ~/.cargo
             target
           key: cargo-${{ hashFiles('Cargo.lock') }}-1
-
+      - name: Echo Cache result
+        run: echo Cache-hit ${{ steps.cache.outputs.cache-hit }}
       - name: Build
         run: |
           cargo build --release
