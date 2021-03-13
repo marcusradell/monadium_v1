@@ -1,0 +1,30 @@
+name: Docker Copy Only
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Repo
+        uses: actions/checkout@v2
+
+      - name: Cache cargo
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+
+      - name: Build
+        run: |
+          cargo build --release
+          cargo test --release
+
+      - name: Build image
+        run: |
+          docker build -t eu.gcr.io/${{ secrets.GOOGLE_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{github.sha}} Dockefile.copy_only
