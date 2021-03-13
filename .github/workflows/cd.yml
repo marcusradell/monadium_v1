@@ -39,7 +39,8 @@ jobs:
 
       - name: Cloud Run Deploy
         run: |
-          gcloud run deploy $SERVICE_NAME --image eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
+          gcloud run deploy ${{ secrets.SERVICE_NAME }} \
+          --image eu.gcr.io/${{ secrets.GOOGLE_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }} \
           --platform managed \
           --region europe-north1 \
           --allow-unauthenticated \
