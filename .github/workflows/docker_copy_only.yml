@@ -19,9 +19,16 @@ jobs:
           path: |
             ~/.cargo
             target
-          key: cargo-${{ hashFiles('Cargo.lock') }}-1
-      - name: Echo Cache result
-        run: echo Cache-hit ${{ steps.cache.outputs.cache-hit }}
+          key: cargo-${{ hashFiles('Cargo.lock') }}
+
+      - name: Echo Cache Hit
+        if: steps.echo.outputs.cache-hit == 'true'
+        run: echo Cache-hit
+
+      - name: Echo Cache Miss
+        if: steps.echo.outputs.cache-hit == 'false'
+        run: echo Cache-miss
+
       - name: Build
         run: |
           cargo build --release
