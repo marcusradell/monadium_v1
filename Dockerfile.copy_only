@@ -1,4 +1,4 @@
-FROM debian:1.50.0-slim
+FROM debian:slim
 
 WORKDIR /app
 
