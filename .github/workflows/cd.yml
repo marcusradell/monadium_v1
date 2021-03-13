@@ -28,14 +28,10 @@ jobs:
         if: steps.cache.outputs.cache-hit == 'false'
         run: echo Cache-miss
 
-      - name: Build
+      - name: Cargo Build
         run: |
           cargo build --release
           cargo test --release
-
-      - name: Build image
-        run: |
-          docker build -t eu.gcr.io/${{ secrets.GOOGLE_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }} .
 
       # Setup gcloud CLI
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
@@ -45,8 +41,18 @@ jobs:
           export_default_credentials: true
 
       # Configure docker to use the gcloud command-line tool as a credential helper
+      - name: GCloud Auth Docker
       - run: |
           gcloud auth configure-docker -q
+
+      - name: Docker Build
+        run: |
+          docker build -t eu.gcr.io/${{ secrets.GOOGLE_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }} .
+
+      # Push image to Google Container Registry
+      - name: Docker Push
+        run: |-
+          docker push eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
 
       - name: Cloud Run Deploy
         run: |
