@@ -27,4 +27,4 @@ jobs:
 
       - name: Build image
         run: |
-          docker build -t eu.gcr.io/${{ secrets.GOOGLE_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{github.sha}} Dockefile.copy_only
+          docker build -t eu.gcr.io/${{ secrets.GOOGLE_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{github.sha}} Dockerfile.copy_only
