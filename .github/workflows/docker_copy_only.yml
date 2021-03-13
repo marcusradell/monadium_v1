@@ -15,20 +15,10 @@ jobs:
       - name: Cargo Cache
         uses: actions/cache@v1
         with:
-          path: ~/.cargo
-          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
-            ${{ runner.os }}-cargo
-
-      - name: Cargo Target Cache
-        uses: actions/cache@v1
-        with:
-          path: target
-          key: ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
-            ${{ runner.os }}-cargo-target
+          path: |
+            ~/.cargo
+            target
+          key: cargo-${{ hashFiles('Cargo.lock') }}-1
 
       - name: Build
         run: |
@@ -37,4 +27,4 @@ jobs:
 
       - name: Build image
         run: |
-          docker build -t eu.gcr.io/${{ secrets.GOOGLE_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{github.sha}} -f Dockerfile.copy_only .
+          docker build -t eu.gcr.io/${{ secrets.GOOGLE_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }} -f Dockerfile.copy_only .
