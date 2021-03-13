@@ -21,13 +21,13 @@ jobs:
         with:
           install: true
 
-      - name: Cache Docker layers
+      - name: Cache Docker Layers
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx
 
       - name: Cargo Cache
         uses: actions/cache@v1
@@ -57,12 +57,16 @@ jobs:
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
           export_default_credentials: true
 
-      # And make it available for the builds
+      # Configure docker to use the gcloud command-line tool as a credential helper
+      - run: |
+          gcloud auth configure-docker -q
+
       - name: Docker Build
         uses: docker/build-push-action@v2
         with:
           context: .
-          load: true
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
           tags: eu.gcr.io/${{ secrets.GOOGLE_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{github.sha}}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
@@ -75,15 +79,6 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-      # Configure docker to use the gcloud command-line tool as a credential helper
-      - run: |
-          gcloud auth configure-docker -q
-
-      # Push image to Google Container Registry
-      - name: Docker Push
-        run: |-
-          docker push eu.gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
 
       - name: Cloud Run Deploy
         run: |
