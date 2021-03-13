@@ -1,4 +1,4 @@
-name: Docker Copy Only
+name: CD
 
 on:
   push:
@@ -36,3 +36,17 @@ jobs:
       - name: Build image
         run: |
           docker build -t eu.gcr.io/${{ secrets.GOOGLE_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }} -f Dockerfile.copy_only .
+
+      - name: Cloud Run Deploy
+        run: |
+          gcloud run deploy $SERVICE_NAME \
+          --image eu.gcr.io/${{ secrets.GOOGLE_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }} \
+          --platform managed \
+          --region europe-north1 \
+          --allow-unauthenticated \
+          --memory 256M \
+          --max-instances 1 \
+          --set-env-vars "DATABASE_URL=${{ secrets.DATABASE_URL }}" \
+          --set-env-vars "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
+          --set-env-vars "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" \
+          --set-env-vars "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}"
