@@ -10,7 +10,7 @@ RUN apt-get update && apt-get -y install \
 
 COPY /target/release/app /usr/local/bin
 
-RUN chown -R /app /app
+RUN chown -R app /app
 
 USER app
 
