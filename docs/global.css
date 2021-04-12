@@ -7,8 +7,8 @@
 }
 
 body {
-  font-size: 20px;
-  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 24px;
+  font-family: Calibri, "Gill Sans", "Gill Sans MT", "Trebuchet MS", sans-serif;
   margin: 1rem;
   padding: 0;
   color: var(--text-color);
