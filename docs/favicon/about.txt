@@ -1,0 +1,6 @@
+This favicon was generated using the following font:
+
+- Font Title: Metal
+- Font Author: http://scripts.sil.org/OFL
+- Font Source: http://fonts.gstatic.com/s/metal/v15/lW-wwjUJIXTo7i3nnoQAUdN2.ttf
+- Font License: SIL Open Font License, 1.1 (http://scripts.sil.org/OFL)
