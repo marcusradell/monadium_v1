@@ -9,7 +9,7 @@ pub async fn init(
     configure_list: Vec<fn(&mut web::ServiceConfig)>,
 ) -> std::io::Result<()> {
     let server = HttpServer::new(move || {
-        let mut scope = web::scope("/api");
+        let mut scope = web::scope("");
 
         for configure in configure_list.clone() {
             scope = scope.configure(configure);

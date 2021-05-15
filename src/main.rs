@@ -3,7 +3,7 @@ extern crate diesel;
 extern crate argon2;
 extern crate dotenv;
 use dotenv::dotenv;
-mod app;
+mod domain;
 mod io;
 mod schema;
 
@@ -24,7 +24,11 @@ async fn main() -> std::io::Result<()> {
         db_pool,
         jwt,
         "0.0.0.0:8080".into(),
-        vec![app::health::configure, app::identity::configure],
+        vec![
+            domain::health::configure,
+            domain::identities::configure,
+            domain::payments::configure,
+        ],
     )
     .await
 }

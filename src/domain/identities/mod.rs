@@ -7,7 +7,7 @@ pub mod sign_in;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
-        web::scope("/identity")
+        web::scope("/identities")
             .route("/new_member", web::post().to(new::new_member))
             .route("/new_administrator", web::post().to(new::new_administrator))
             .route("/show", web::get().to(show::show))
