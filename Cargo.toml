@@ -20,3 +20,4 @@ chrono = {version = "0.4", features = ["serde"]}
 env_logger = "0.8.3"
 uuid= {version = "0.8", features = ["serde","v4"]}
 derive_more = "0.99"
+reqwest = {version = "0.10.10", features = ["json"]}
