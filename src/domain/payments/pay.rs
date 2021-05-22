@@ -1,5 +1,3 @@
-use std::fs::rename;
-
 use crate::io::error::Error;
 use actix_web::{HttpResponse, Result};
 use reqwest::header::CONTENT_TYPE;
