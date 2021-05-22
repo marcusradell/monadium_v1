@@ -2,7 +2,7 @@ use actix_web::web::{self, ServiceConfig};
 mod notify;
 mod pay;
 
-pub fn configure(c: &mut ServiceConfig) {
+pub fn config(c: &mut ServiceConfig) {
     c.service(
         web::scope("/payments")
             .route("/pay", web::post().to(pay::controller))

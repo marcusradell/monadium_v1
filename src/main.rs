@@ -25,9 +25,10 @@ async fn main() -> std::io::Result<()> {
         jwt,
         "0.0.0.0:8080".into(),
         vec![
-            domain::health::configure,
-            domain::identities::configure,
-            domain::payments::configure,
+            domain::health::config,
+            domain::identities::config,
+            domain::payments::config,
+            domain::profile::config,
         ],
     )
     .await

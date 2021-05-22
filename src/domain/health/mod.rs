@@ -8,7 +8,7 @@ async fn ready() -> impl Responder {
     HttpResponse::Ok()
 }
 
-pub fn configure(cfg: &mut web::ServiceConfig) {
+pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/health")
             .route("/live", web::get().to(live))
