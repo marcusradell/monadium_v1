@@ -4,19 +4,19 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
-pub struct NewProfileCommand {
+pub struct Command {
     name: String,
 }
 #[derive(Debug, Serialize)]
-pub struct NewProfileEvent {
+pub struct Event {
     id: String,
     name: String,
 }
 
-async fn handler(cmd: NewProfileCommand) -> Result<(), Error> {
+async fn handler(cmd: Command) -> Result<(), Error> {
     dbg!(&cmd);
 
-    let event = NewProfileEvent {
+    let event = Event {
         id: Uuid::new_v4().to_string(),
         name: cmd.name,
     };
@@ -28,7 +28,7 @@ async fn handler(cmd: NewProfileCommand) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn controller(cmd: web::Json<NewProfileCommand>) -> Result<HttpResponse, Error> {
+pub async fn controller(cmd: web::Json<Command>) -> Result<HttpResponse, Error> {
     let result = handler(cmd.into_inner()).await?;
     Ok(HttpResponse::Ok().json(result))
 }

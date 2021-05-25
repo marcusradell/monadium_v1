@@ -1,5 +1,4 @@
-use actix_web::HttpResponse;
-use actix_web::ResponseError;
+use actix_web::{HttpResponse, ResponseError};
 use derive_more::Display;
 
 #[derive(Debug, Display)]
