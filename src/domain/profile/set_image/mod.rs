@@ -15,7 +15,7 @@ pub struct Event {
     image: String,
 }
 
-async fn handler(cmd: Command) -> Result<(), Error> {
+async fn _handler(cmd: Command) -> Result<(), Error> {
     dbg!(&cmd);
 
     let event = Event {
