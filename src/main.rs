@@ -15,6 +15,17 @@ async fn main() -> std::io::Result<()> {
 
     let jwt = io::jwt::Jwt::new();
 
+    let uri = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL.");
+
+    let pool = io::db::new(uri).await.unwrap();
+
+    let row: (i64,) = sqlx::query_as("SELECT 1::int8")
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+
+    dbg!(row);
+
     io::http::init(
         jwt,
         "0.0.0.0:8080".into(),

@@ -10,12 +10,11 @@ pub enum Error {
 }
 
 impl ResponseError for Error {
-    // TODO: ask for help.
-    // fn error_response(&self) -> HttpResponse {
-    //     match self {
-    //         Error::InternalServerError => HttpResponse::InternalServerError()
-    //             .json("Internal Server Error; please try again later."),
-    //         Error::BadRequest(ref message) => HttpResponse::BadRequest().json(message),
-    //     }
-    // }
+    fn error_response(&self) -> HttpResponse {
+        match self {
+            Error::InternalServerError => HttpResponse::InternalServerError()
+                .json("Internal Server Error; please try again later."),
+            Error::BadRequest(ref message) => HttpResponse::BadRequest().json(message),
+        }
+    }
 }
