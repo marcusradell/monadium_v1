@@ -1,12 +1,33 @@
-use super::model;
-use crate::io::db;
+use super::Service;
 use crate::io::error::Error;
-use crate::schema::identity::dsl;
-use actix_web::{web, HttpResponse};
-use diesel::prelude::*;
+use actix_web::HttpResponse;
+use chrono::Utc;
+use serde::{Deserialize, Serialize};
+use sqlx::types::Json;
 
-pub async fn list(pool: web::Data<db::Pool>) -> Result<HttpResponse, Error> {
-    let conn = pool.get()?;
-    let result = web::block(move || dsl::identity.load::<model::Identity>(&conn)).await?;
-    Ok(HttpResponse::Ok().json(result))
+#[derive(sqlx::FromRow, Deserialize, Serialize)]
+struct EventMeta {}
+#[derive(sqlx::FromRow, Deserialize, Serialize)]
+struct EventData {}
+
+#[derive(sqlx::FromRow, Deserialize, Serialize)]
+struct Event {
+    sequence_num: i64,
+    stream_id: uuid::Uuid,
+    version: i32,
+    #[serde(rename = "type")]
+    type_: String,
+    data: Json<EventData>,
+    meta: Json<EventMeta>,
+    inserted_at: chrono::DateTime<Utc>,
+}
+
+impl Service {
+    pub async fn list(self) -> Result<HttpResponse, Error> {
+        let result = sqlx::query_as::<_, Event>("select * from events")
+            .fetch_all(&self.db)
+            .await?;
+
+        Ok(HttpResponse::Ok().json(result))
+    }
 }

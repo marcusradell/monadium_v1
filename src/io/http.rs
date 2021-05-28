@@ -1,15 +1,12 @@
-use crate::io::jwt;
+use crate::{domain::identities, io::jwt};
 use actix_web::{middleware, web, App, HttpServer};
 
 pub async fn init(
     jwt: jwt::Jwt,
     address: String,
     configure_list: Vec<fn(&mut web::ServiceConfig)>,
+    identities_svc: identities::Service,
 ) -> std::io::Result<()> {
-    // let my_module = Lab {
-    //     foo: "Testing.".into(),
-    // };
-
     let server = HttpServer::new(move || {
         let mut scope = web::scope("");
 
@@ -17,7 +14,7 @@ pub async fn init(
             scope = scope.configure(configure);
         }
 
-        // scope = scope.configure(|cfg| my_module.clone().config(cfg));
+        scope = scope.configure(|cfg| identities_svc.clone().config(cfg));
 
         App::new()
             .data(jwt.clone())
