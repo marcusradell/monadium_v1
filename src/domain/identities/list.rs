@@ -1,14 +1,9 @@
-use super::Service;
+use super::{EventData, EventMeta, Service};
 use crate::io::error::Error;
 use actix_web::HttpResponse;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sqlx::types::Json;
-
-#[derive(sqlx::FromRow, Deserialize, Serialize)]
-struct EventMeta {}
-#[derive(sqlx::FromRow, Deserialize, Serialize)]
-struct EventData {}
 
 #[derive(sqlx::FromRow, Deserialize, Serialize)]
 struct Event {
