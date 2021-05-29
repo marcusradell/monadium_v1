@@ -16,6 +16,7 @@ struct Event {
     stream_id: uuid::Uuid,
     version: i32,
     #[serde(rename = "type")]
+    #[sqlx(rename = "type")]
     type_: String,
     data: Json<EventData>,
     meta: Json<EventMeta>,
