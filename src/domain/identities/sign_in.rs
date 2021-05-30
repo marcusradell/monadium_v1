@@ -1,44 +1,41 @@
-use super::model;
-use crate::io::db;
+use super::Event;
 use crate::io::error::Error;
-use crate::io::jwt;
+use crate::io::jwt::Jwt;
 use crate::io::password;
-use crate::schema::identity::dsl::*;
-use actix_web::{web, HttpResponse};
-use diesel::prelude::*;
+use actix_web::HttpResponse;
+use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
 
-#[derive(serde::Deserialize, Debug, Clone)]
-pub struct SignInArgs {
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Args {
     email: String,
     password: String,
 }
 
 #[derive(serde::Serialize, Debug)]
-struct SignInResponse {
+struct Response {
     jwt: String,
 }
 
-pub async fn sign_in(
-    pool: web::Data<db::Pool>,
-    jwt: web::Data<jwt::Jwt>,
-    args: web::Json<SignInArgs>,
-) -> Result<HttpResponse, Error> {
-    let conn = pool.get()?;
-
-    let cloned_args = args.clone();
-    let identity_by_email = web::block(move || {
-        identity
-            .filter(email.eq(cloned_args.email))
-            .first::<model::Identity>(&conn)
-    })
+pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<HttpResponse, Error> {
+    let events = sqlx::query_as::<_, Event>(
+        "select * from events where data->>'email' = $1 order by sequence_num asc",
+    )
+    .bind(args.email.clone())
+    .fetch_all(&db)
     .await?;
 
-    let verify_result = password::verify(&identity_by_email.password_hash, &args.password)?;
+    let identity = events
+        .iter()
+        .find(|&event| event.data.email == args.email)
+        .ok_or(Error::BadRequest("Wrong email or password.".into()))?;
+
+    let verify_result = password::verify(&identity.data.password_hash, &args.password)?;
 
     match verify_result {
         true => {
-            let encoded_jwt = jwt.into_inner().encode(args.email.clone())?;
-            Ok(HttpResponse::Ok().json(SignInResponse { jwt: encoded_jwt }))
+            let encoded_jwt = jwt.encode(args.email.clone())?;
+            Ok(HttpResponse::Ok().json(Response { jwt: encoded_jwt }))
         }
         false => Ok(HttpResponse::InternalServerError().finish()),
     }
