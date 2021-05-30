@@ -1,5 +1,6 @@
 extern crate argon2;
 extern crate dotenv;
+
 use dotenv::dotenv;
 mod domain;
 mod io;
@@ -19,8 +20,8 @@ async fn main() -> std::io::Result<()> {
 
     let db = io::db::new(uri).await.unwrap();
 
-    io::http::init(
-        "0.0.0.0:8080".into(),
+    let http = io::http::init(
+        8080,
         jwt,
         db,
         vec![
@@ -30,5 +31,7 @@ async fn main() -> std::io::Result<()> {
             domain::identities::config,
         ],
     )
-    .await
+    .await?;
+
+    http.server.await
 }
