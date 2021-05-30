@@ -1,11 +1,12 @@
-use crate::{domain::identities, io::jwt};
+use crate::io::jwt::Jwt;
 use actix_web::{middleware, web, App, HttpServer};
+use sqlx::PgPool;
 
 pub async fn init(
-    jwt: jwt::Jwt,
     address: String,
+    jwt: Jwt,
+    db: PgPool,
     configure_list: Vec<fn(&mut web::ServiceConfig)>,
-    identities_svc: identities::Service,
 ) -> std::io::Result<()> {
     let server = HttpServer::new(move || {
         let mut scope = web::scope("");
@@ -14,10 +15,9 @@ pub async fn init(
             scope = scope.configure(configure);
         }
 
-        scope = scope.configure(|cfg| identities_svc.clone().config(cfg));
-
         App::new()
-            .data(jwt.clone())
+            .app_data(jwt.clone())
+            .app_data(db.clone())
             .wrap(middleware::Logger::default())
             .data(web::JsonConfig::default().limit(4096))
             .service(scope)

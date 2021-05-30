@@ -1,4 +1,4 @@
-use actix_web::{web, HttpRequest};
+use actix_web::web;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -19,35 +19,20 @@ pub struct EventMeta {
     pub cid: Uuid,
 }
 
-#[derive(Debug, Clone)]
-pub struct Service {
-    db: PgPool,
-}
-
-impl Service {
-    pub fn new(db: PgPool) -> Self {
-        Self { db }
-    }
-
-    pub fn config(self, cfg: &mut web::ServiceConfig) {
-        cfg.service(
-            web::scope("/identities")
-                .route(
-                    "/list",
-                    web::get().to({
-                        let this = self.clone();
-                        move |_: HttpRequest| this.clone().list()
-                    }),
-                )
-                .route(
-                    "/sign_up",
-                    web::post().to({
-                        let this = self.clone();
-                        move |web_args: web::Json<sign_up::Args>| {
-                            this.clone().sign_up(web_args.into_inner())
-                        }
-                    }),
+pub fn config(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::scope("/identities")
+            .route(
+                "/list",
+                web::get().to(|web_db: web::Data<PgPool>| list::handler(web_db.get_ref().clone())),
+            )
+            .route(
+                "/sign_up",
+                web::post().to(
+                    |web_db: web::Data<PgPool>, web_args: web::Json<sign_up::Args>| {
+                        sign_up::handler(web_db.get_ref().clone(), web_args.into_inner())
+                    },
                 ),
-        );
-    }
+            ),
+    );
 }

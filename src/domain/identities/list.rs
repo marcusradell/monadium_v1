@@ -1,9 +1,9 @@
-use super::{EventData, EventMeta, Service};
+use super::{EventData, EventMeta};
 use crate::io::error::Error;
 use actix_web::HttpResponse;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use sqlx::types::Json;
+use sqlx::{types::Json, PgPool};
 
 #[derive(sqlx::FromRow, Deserialize, Serialize)]
 struct Event {
@@ -18,12 +18,9 @@ struct Event {
     inserted_at: chrono::DateTime<Utc>,
 }
 
-impl Service {
-    pub async fn list(self) -> Result<HttpResponse, Error> {
-        let result = sqlx::query_as::<_, Event>("select * from events")
-            .fetch_all(&self.db)
-            .await?;
-
-        Ok(HttpResponse::Ok().json(result))
-    }
+pub async fn handler(db: PgPool) -> Result<HttpResponse, Error> {
+    let result = sqlx::query_as::<_, Event>("select * from events")
+        .fetch_all(&db)
+        .await?;
+    Ok(HttpResponse::Ok().json(result))
 }
