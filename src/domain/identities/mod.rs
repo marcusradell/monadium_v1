@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use actix_web::{web, HttpRequest};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
