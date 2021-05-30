@@ -6,13 +6,12 @@ pub async fn init(
     address: String,
     jwt: Jwt,
     db: PgPool,
-    configure_list: Vec<fn(&mut web::ServiceConfig)>,
+    configs: Vec<fn(&mut web::ServiceConfig)>,
 ) -> std::io::Result<()> {
     let server = HttpServer::new(move || {
         let mut scope = web::scope("");
-
-        for configure in configure_list.clone() {
-            scope = scope.configure(configure);
+        for config in configs.clone() {
+            scope = scope.configure(config);
         }
 
         App::new()
