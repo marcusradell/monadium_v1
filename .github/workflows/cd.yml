@@ -8,6 +8,8 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-18.04
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
