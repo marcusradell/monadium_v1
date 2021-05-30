@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use actix_web::{web, HttpRequest};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
@@ -30,19 +32,22 @@ impl Service {
     }
 
     pub fn config(self, cfg: &mut web::ServiceConfig) {
-        let self_1 = self.clone();
-        let self_2 = self.clone();
-
         cfg.service(
             web::scope("/identities")
                 .route(
                     "/list",
-                    web::get().to(move |_: HttpRequest| self_1.clone().list()),
+                    web::get().to({
+                        let this = self.clone();
+                        move |_: HttpRequest| this.clone().list()
+                    }),
                 )
                 .route(
                     "/sign_up",
-                    web::post().to(move |web_args: web::Json<sign_up::Args>| {
-                        self_2.clone().sign_up(web_args.into_inner())
+                    web::post().to({
+                        let this = self.clone();
+                        move |web_args: web::Json<sign_up::Args>| {
+                            this.clone().sign_up(web_args.into_inner())
+                        }
                     }),
                 ),
         );
