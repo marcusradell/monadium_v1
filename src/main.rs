@@ -26,7 +26,6 @@ async fn main() -> std::io::Result<()> {
         db,
         vec![
             domain::health::config,
-            domain::payments::config,
             domain::profile::config,
             domain::identities::config,
         ],
