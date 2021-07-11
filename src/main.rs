@@ -7,9 +7,8 @@ mod io;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv().ok();
-
     println!("Booting server.");
+    dotenv().ok();
 
     std::env::set_var("RUST_LOG", "actix_web=info,actix_server=info");
     env_logger::init();
