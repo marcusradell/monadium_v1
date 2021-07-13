@@ -6,9 +6,9 @@ use uuid::Uuid;
 
 use crate::io::jwt::Jwt;
 pub mod list;
-pub mod sign_up;
-// pub mod show;
+pub mod show;
 pub mod sign_in;
+pub mod sign_up;
 
 #[derive(sqlx::FromRow, Deserialize, Serialize, Debug)]
 pub struct Event {
@@ -41,6 +41,10 @@ pub fn config(cfg: &mut web::ServiceConfig) {
             .route(
                 "/list",
                 web::get().to(|web_db: web::Data<PgPool>| list::handler(web_db.get_ref().clone())),
+            )
+            .route(
+                "/show",
+                web::get().to(|web_db: web::Data<PgPool>| show::handler(web_db.get_ref().clone())),
             )
             .route(
                 "/sign_in",
