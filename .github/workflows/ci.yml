@@ -60,7 +60,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: marcusradell/monadium-infra
-          token: ${{ secrets.CI_TOKEN }}
+          token: ${{ secrets.INFRA_REPO_TOKEN }}
           path: infra
 
       - name: Push to infra
