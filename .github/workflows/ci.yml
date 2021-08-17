@@ -64,4 +64,4 @@ jobs:
         run: |
           cd infra/k8s/base/${{ secrets.SERVICE_NAME }}
           kustomize edit set image var-image=eu.gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }}
-          git commit -am --author "${{ secrets.SERVICE_NAME }} <>" "Deploy new image eu.gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }}"
+          git commit --author "${{ secrets.SERVICE_NAME }} <>" -am "Deploy new image eu.gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }}"
