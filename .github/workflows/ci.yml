@@ -6,7 +6,7 @@ on:
       - "main"
 
 env:
-  - DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+  DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
 
 jobs:
   ci:
