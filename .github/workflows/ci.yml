@@ -5,6 +5,9 @@ on:
     branches:
       - "main"
 
+env:
+  - DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+
 jobs:
   ci:
     runs-on: ubuntu-20.04
