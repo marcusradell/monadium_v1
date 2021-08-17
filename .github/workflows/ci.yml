@@ -67,3 +67,4 @@ jobs:
           cd infra/k8s/base/monadium
           kustomize edit set image var-image=eu.gcr.io/monadium/monadium:${{ github.sha }}
           git commit -am "Deploy new image eu.gcr.io/monadium/monadium:${{ github.sha }}"
+          git push
