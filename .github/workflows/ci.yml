@@ -62,7 +62,7 @@ jobs:
 
       - name: Push to infra
         run: |
-          git config --global user.email marcus@radell.net"
+          git config --global user.email "marcus@radell.net"
           git config --global user.name "Marcus Rådell"
           cd infra/k8s/base/monadium
           kustomize edit set image var-image=eu.gcr.io/monadium/monadium:${{ github.sha }}
