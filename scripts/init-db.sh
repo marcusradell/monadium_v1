@@ -1,0 +1,1 @@
+echo "TODO: init db script."

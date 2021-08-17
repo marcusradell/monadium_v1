@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  ci:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Setup Rust Toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Setup Rust Cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Setup GCP
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Setup GKE auth
+        uses: google-github-actions/get-gke-credentials@main
+        with:
+          cluster_name: ${{ secrets.GCP_GKE_CLUSTER_NAME }}
+          location: ${{ secrets.GCP_REGION }}
+
+      - name: Setup Docker For GCP
+        run: |
+          gcloud auth configure-docker -q
+
+      - name: Install sqlx cli
+        run: ./scripts/install-sqlx.sh
+
+      - name: Init DB
+        run: ./scripts/init-db.sh
+
+      - name: Cargo Build
+        run: cargo build --release
+
+      - name: Cargo Test
+        run: cargo test --release
+
+      - name: Docker Build
+        run: docker build -t eu.gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }} .
+
+      - name: Docker Push
+        run: docker push eu.gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }}
+
+      - name: Checkout infra repository
+        uses: actions/checkout@v2
+        with:
+          repository: marcusradell/monadium-infra
+          token: ${{ secrets.CI_TOKEN }}
+          path: infra
+
+      - name: Push to infra
+        run: |
+          cd infra/k8s/base/${{ secrets.SERVICE_NAME }}
+          kustomize edit set image var-image=eu.gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }}
+          git commit -am --author "${{ secrets.SERVICE_NAME }} <>" "Deploy new image eu.gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:${{ github.sha }}"
