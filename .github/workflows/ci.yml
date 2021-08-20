@@ -20,6 +20,10 @@ jobs:
     steps:
       - name: debug cache key
         run: echo ${{ runner.os }}-sqlx-${{ hashFiles('scripts/install-sqlx.sh')}}
+
+      - name: debug cache hit
+        run: echo steps.cache-sqlx.outputs.cache-hit
+
       - name: Checkout repo
         uses: actions/checkout@v2
 
@@ -51,7 +55,7 @@ jobs:
           gcloud auth configure-docker -q
 
       - name: Install sqlx cli
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache-sqlx.outputs.cache-hit != 'true'
         run: ./scripts/install-sqlx.sh
 
       - name: Init DB
