@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: debug cache key
-        run: echo ${{ runner.os }}-sqlx-${{ hashFiles('/scripts/install-sqlx.sh')}}
+        run: echo ${{ runner.os }}-sqlx-${{ hashFiles('**/install-sqlx.sh')}}
 
       - name: debug cache hit
         run: echo ${{ steps.cache-sqlx.outputs.cache-hit }}
@@ -41,7 +41,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cargo/bin
-          key: ${{ runner.os }}-sqlx-${{ hashFiles('scripts/install-sqlx.sh')}}
+          key: ${{ runner.os }}-sqlx-${{ hashFiles('**/install-sqlx.sh')}}
 
       - name: Setup GCP
         uses: google-github-actions/setup-gcloud@master
