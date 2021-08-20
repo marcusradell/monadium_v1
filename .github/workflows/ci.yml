@@ -38,6 +38,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
+            /usr/local/cargo
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Setup GCP
