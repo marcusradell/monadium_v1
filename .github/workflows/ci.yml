@@ -19,10 +19,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: debug cache key
-        run: echo ${{ runner.os }}-sqlx-${{ hashFiles('scripts/install-sqlx.sh')}}
+        run: echo ${{ runner.os }}-sqlx-${{ hashFiles('/scripts/install-sqlx.sh')}}
 
       - name: debug cache hit
-        run: echo steps.cache-sqlx.outputs.cache-hit
+        run: echo ${{ steps.cache-sqlx.outputs.cache-hit }}
 
       - name: Checkout repo
         uses: actions/checkout@v2
