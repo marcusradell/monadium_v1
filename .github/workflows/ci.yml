@@ -7,13 +7,12 @@ on:
 
 env:
   DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
-  SERVICE_NAME: monadium
   GIT_EMAIL: marcus+monadium-ci@radell.net
 
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
   INFRA_REPO_TOKEN: ${{ secrets.INFRA_REPO_TOKEN }}
-  IMAGE_URL: eu.gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+  IMAGE_URL: eu.gcr.io/${{ secrets.GCP_PROJECT_ID }}/monadium:${{ github.sha }}
 
 jobs:
   ci:
