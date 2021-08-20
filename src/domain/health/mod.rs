@@ -9,6 +9,7 @@ async fn ready() -> impl Responder {
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
+    // Only used for Kubernetes probe.
     cfg.route("/", web::get().to(live));
     cfg.service(
         web::scope("/health")
