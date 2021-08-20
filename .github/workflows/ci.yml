@@ -7,6 +7,13 @@ on:
 
 env:
   DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+  SERVICE_NAME: monadium
+  GIT_EMAIL: marcus+monadium-ci@radell.net
+
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+  INFRA_REPO_TOKEN: ${{ secrets.INFRA_REPO_TOKEN }}
+  IMAGE_URL: eu.gcr.io/$GCP_PROJECT_ID/$SERVICE_NAME:${{ github.sha }}
 
 jobs:
   ci:
@@ -27,8 +34,8 @@ jobs:
       - name: Setup GCP
         uses: google-github-actions/setup-gcloud@master
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          service_account_key: ${{ env.GCP_SA_KEY }}
           export_default_credentials: true
 
       - name: Setup Docker For GCP
@@ -48,23 +55,23 @@ jobs:
         run: cargo test --release
 
       - name: Docker Build
-        run: docker build -t eu.gcr.io/monadium/monadium:${{ github.sha }} .
+        run: docker build -t $IMAGE_URL .
 
       - name: Docker Push
-        run: docker push eu.gcr.io/monadium/monadium:${{ github.sha }}
+        run: docker push $IMAGE_URL
 
       - name: Checkout infra repository
         uses: actions/checkout@v2
         with:
           repository: marcusradell/monadium-infra
-          token: ${{ secrets.INFRA_REPO_TOKEN }}
+          token: ${{ env.INFRA_REPO_TOKEN }}
           path: infra
 
       - name: Push to infra
         run: |
-          git config --global user.email "marcus@radell.net"
-          git config --global user.name "Marcus Rådell"
+          git config --global user.email "$GIT_EMAIL"
+          git config --global user.name "$GITHUB_ACTOR"
           cd infra/k8s/base/monadium
-          kustomize edit set image var-image=eu.gcr.io/monadium/monadium:${{ github.sha }}
-          git commit -am "Deploy new image eu.gcr.io/monadium/monadium:${{ github.sha }}"
+          kustomize edit set image var-image=$IMAGE_URL
+          git commit -am "Deploy new image $IMAGE_URL"
           git push
