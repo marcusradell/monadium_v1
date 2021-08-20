@@ -33,6 +33,8 @@ We use trunk-based development, so there are no PRs in most cases. Don't feel af
 
 - `cargo run` will run the app locally.
 
+- `cargo install cargo-watch` will enable you to run `cargo watch -x run`, and is the preferred way if you prefer to not TDD.
+
 ## Testing
 
 - TODO. Some code for testing might exist, but will be changed.
