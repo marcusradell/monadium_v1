@@ -40,7 +40,7 @@ jobs:
         id: cache-sqlx
         uses: actions/cache@v2
         with:
-          path: /usr/local/cargo
+          path: ~/.cargo/bin
           key: ${{ runner.os }}-sqlx-${{ hashFiles('scripts/install-sqlx.sh')}}
 
       - name: Setup GCP
