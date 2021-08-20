@@ -28,8 +28,18 @@ jobs:
           profile: minimal
           toolchain: stable
 
-      - name: Setup Rust Cache
-        uses: Swatinem/rust-cache@v1
+      # - name: Setup Rust Cache
+      #   uses: Swatinem/rust-cache@v1
+
+      - name: Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Setup GCP
         uses: google-github-actions/setup-gcloud@master
@@ -43,7 +53,8 @@ jobs:
           gcloud auth configure-docker -q
 
       - name: Install sqlx cli
-        run: ./scripts/install-sqlx.sh
+        # run: ./scripts/install-sqlx.sh
+        run: cargo install --version=0.5.5 --locked sqlx-cli --no-default-features --features postgres
 
       - name: Init DB
         run: ./scripts/init-db.sh
