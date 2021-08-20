@@ -15,7 +15,29 @@ It also contains the `error` module that should be used by all other `io` module
 ### Domain
 
 Contains all of the business logic which uses the `io` modules.
+The structure of the domains will be based on event sourcing, which uses an append-only table with reducer functions to replay the actual state as needed.
 
-`health` will be extracted into the future crate as a shared app for every service that needs `live` and `ready` checks.
+- `health` will be extracted into the future crate as a shared app for every service that needs `live` and `ready` checks.
 
-`identities` takes care of signing up and signing in.
+- `identities` takes care of signing up and signing in.
+
+## Planning
+
+Check the project board here on GitHub. It strives to be a user story map with columns for each feature and milestones for each release across features.
+
+## Developing
+
+We use trunk-based development, so there are no PRs in most cases. Don't feel afraid to break the rules though until you feel comfortable.
+
+- Copy/paste `.env.example` as `.env`. Populate the values as you want.
+
+- `cargo run` will run the app locally.
+
+## Testing
+
+- TODO. Some code for testing might exist, but will be changed.
+
+## Deploying
+
+This repo takes care of the Continuous Integration pipeline, and then pushes a commit to the `monadium-infra` repo which then deploys to production.
+There's no staging environment, and any such environment should be thrown away after it has been used to ensure that setting up new environments is simple and automated.
