@@ -1,34 +1,44 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, HttpResponse};
+use serde::Deserialize;
 use sqlx::PgPool;
-use serde::{Deserialize,Serialize};
 
 use crate::io::error::{ClientError, Error};
 
-#[derive(Debug, Serialize)]
-pub struct Profile {
-    id: String,
-    name: String,
-}
+use super::{Profile, Status};
 
 #[derive(Debug, Deserialize)]
-pub struct Query {
-    id: String
+pub struct Args {
+    id: String,
 }
 
-async fn handler(query: Query, _db: PgPool)->Result<Profile,Error>{
-if query.id != "1" {
-    return Err(Error::BadRequest(ClientError{code: "NOT_FOUND".into(), message: format!("Could not find ID {}.", query.id)}))
-}
-    
-let result = Profile{
-        id: query.id,
-        name: "TODO".into()
+async fn handler(args: Args, _db: PgPool) -> Result<Profile, Error> {
+    // Temp solution before using a DB.
+    let marcus_profile = Profile {
+        id: "1".into(),
+        name: "Marcus Rådell".into(),
+        date_of_birth: "1982-03-03".into(),
+        status: Status::Active,
+        email: "marcus@radell.net".into(),
+        phone_number: "+46725223325".into(),
+        location: "Snickarvägen 27, 19730 Bro, Sweden".into(),
     };
+
+    if args.id != marcus_profile.id {
+        return Err(Error::BadRequest(ClientError {
+            code: "NOT_FOUND".into(),
+            message: format!("Could not find ID {}.", args.id),
+        }));
+    }
+
+    let result = marcus_profile;
 
     Ok(result)
 }
 
-pub async fn controller(query: web::Path<Query>, db: web::Data<PgPool>)->Result<HttpResponse, Error>{
-    let result=handler(query.into_inner(),db.get_ref().clone()).await?;
+pub async fn controller(
+    query: web::Path<Args>,
+    db: web::Data<PgPool>,
+) -> Result<HttpResponse, Error> {
+    let result = handler(query.into_inner(), db.get_ref().clone()).await?;
     Ok(HttpResponse::Ok().json(result))
 }
