@@ -2,7 +2,7 @@ use actix_web::{HttpResponse, web};
 use sqlx::PgPool;
 use serde::{Deserialize,Serialize};
 
-use crate::io::error::Error;
+use crate::io::error::{ClientError, Error};
 
 #[derive(Debug, Serialize)]
 pub struct Profile {
@@ -16,7 +16,11 @@ pub struct Query {
 }
 
 async fn handler(query: Query, _db: PgPool)->Result<Profile,Error>{
-    let result = Profile{
+if query.id != "1" {
+    return Err(Error::BadRequest(ClientError{code: "NOT_FOUND".into(), message: format!("Could not find ID {}.", query.id)}))
+}
+    
+let result = Profile{
         id: query.id,
         name: "TODO".into()
     };

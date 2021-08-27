@@ -1,5 +1,5 @@
 use super::Event;
-use crate::io::error::Error;
+use crate::io::error::{ClientError, Error};
 use crate::io::jwt::Jwt;
 use crate::io::password;
 use actix_web::HttpResponse;
@@ -28,7 +28,7 @@ pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<HttpResponse, E
     let identity = events
         .iter()
         .find(|&event| event.data.email == args.email)
-        .ok_or(Error::BadRequest("Wrong email or password.".into()))?;
+        .ok_or(Error::BadRequest(ClientError{code: "AUTHORIZATION_FAILED".into(),message:"Wrong email or password.".into()}))?;
 
     let verify_result = password::verify(&identity.data.password_hash, &args.password)?;
 
