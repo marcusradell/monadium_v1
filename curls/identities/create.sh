@@ -1,3 +1,5 @@
+#!/bin/bash
+
 . ./curls/base.sh
 
 EMAIL=$1
