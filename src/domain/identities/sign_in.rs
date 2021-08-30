@@ -28,13 +28,16 @@ pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<HttpResponse, E
     let identity = events
         .iter()
         .find(|&event| event.data.email == args.email)
-        .ok_or(Error::BadRequest(ClientError{code: "AUTHORIZATION_FAILED".into(),message:"Wrong email or password.".into()}))?;
+        .ok_or(Error::BadRequest(ClientError {
+            code: "AUTHORIZATION_FAILED".into(),
+            message: "Wrong email or password.".into(),
+        }))?;
 
     let verify_result = password::verify(&identity.data.password_hash, &args.password)?;
 
     match verify_result {
         true => {
-            let encoded_jwt = jwt.encode(args.email.clone())?;
+            let encoded_jwt = jwt.encode("TODO".into(), args.email.clone())?;
             Ok(HttpResponse::Ok().json(Response { jwt: encoded_jwt }))
         }
         false => Ok(HttpResponse::InternalServerError().finish()),

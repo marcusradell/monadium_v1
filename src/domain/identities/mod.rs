@@ -5,10 +5,10 @@ use sqlx::{types::Json, PgPool};
 use uuid::Uuid;
 
 use crate::io::jwt::Jwt;
+pub mod create;
 pub mod list;
 pub mod show;
 pub mod sign_in;
-pub mod sign_up;
 
 #[derive(sqlx::FromRow, Deserialize, Serialize, Debug)]
 pub struct Event {
@@ -60,13 +60,6 @@ pub fn config(cfg: &mut web::ServiceConfig) {
                     },
                 ),
             )
-            .route(
-                "/sign_up",
-                web::post().to(
-                    |web_db: web::Data<PgPool>, web_args: web::Json<sign_up::Args>| {
-                        sign_up::handler(web_db.get_ref().clone(), web_args.into_inner())
-                    },
-                ),
-            ),
+            .route("/create", web::post().to(create::controller)),
     );
 }
