@@ -1,18 +1,18 @@
 use super::error::Error;
-use jsonwebtoken::{EncodingKey, Header};
+use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation};
 use serde::{Deserialize, Serialize};
 use std::env;
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Claims {
-    email: String,
-    id: String,
-    exp: usize,
+pub struct Claims {
+    pub email: String,
+    pub id: String,
+    pub exp: usize,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Jwt {
-    secret: String,
+    pub secret: String,
 }
 
 impl Jwt {
@@ -31,6 +31,16 @@ impl Jwt {
             &Claims { email, id, exp: 10 },
             &EncodingKey::from_secret(self.secret.as_ref()),
         )
+    }
+
+    pub fn decode(&self, encoded_jwt: String) -> Result<Claims, Error> {
+        let result: TokenData<Claims> = jsonwebtoken::decode(
+            &encoded_jwt,
+            &DecodingKey::from_secret(self.secret.as_ref()),
+            &Validation::new(Algorithm::default()),
+        )?;
+
+        Ok(result.claims.into())
     }
 }
 
