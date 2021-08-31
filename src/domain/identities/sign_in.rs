@@ -37,7 +37,7 @@ pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<Response, Error
 
     match verify_result {
         true => {
-            let encoded_jwt = jwt.encode("TODO".into(), args.email.clone())?;
+            let encoded_jwt = jwt.encode(identity.stream_id.to_string(), args.email.clone())?;
             Ok(Response { jwt: encoded_jwt })
         }
         false => Err(Error::BadRequest(ClientError {
