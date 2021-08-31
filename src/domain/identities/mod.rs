@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 use sqlx::{types::Json, PgPool};
 use uuid::Uuid;
 
-use crate::io::jwt::Jwt;
 pub mod create;
 pub mod list;
 pub mod show;
@@ -46,20 +45,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
                 "/show",
                 web::get().to(|web_db: web::Data<PgPool>| show::handler(web_db.get_ref().clone())),
             )
-            .route(
-                "/sign_in",
-                web::post().to(
-                    |web_db: web::Data<PgPool>,
-                     web_jwt: web::Data<Jwt>,
-                     web_args: web::Json<sign_in::Args>| {
-                        sign_in::handler(
-                            web_db.get_ref().clone(),
-                            web_jwt.get_ref().clone(),
-                            web_args.into_inner(),
-                        )
-                    },
-                ),
-            )
+            .route("/sign_in", web::post().to(sign_in::controller))
             .route("/create", web::post().to(create::controller)),
     );
 }

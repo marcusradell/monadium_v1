@@ -2,22 +2,22 @@ use super::Event;
 use crate::io::error::{ClientError, Error};
 use crate::io::jwt::Jwt;
 use crate::io::password;
-use actix_web::HttpResponse;
+use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Args {
-    email: String,
-    password: String,
+    pub email: String,
+    pub password: String,
 }
 
 #[derive(serde::Serialize, Debug)]
-struct Response {
-    jwt: String,
+pub struct Response {
+    pub jwt: String,
 }
 
-pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<HttpResponse, Error> {
+pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<Response, Error> {
     let events = sqlx::query_as::<_, Event>(
         "select * from events where data->>'email' = $1 order by sequence_num asc",
     )
@@ -29,7 +29,7 @@ pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<HttpResponse, E
         .iter()
         .find(|&event| event.data.email == args.email)
         .ok_or(Error::BadRequest(ClientError {
-            code: "AUTHORIZATION_FAILED".into(),
+            code: "AUTHENTICATION_FAILED".into(),
             message: "Wrong email or password.".into(),
         }))?;
 
@@ -38,8 +38,26 @@ pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<HttpResponse, E
     match verify_result {
         true => {
             let encoded_jwt = jwt.encode("TODO".into(), args.email.clone())?;
-            Ok(HttpResponse::Ok().json(Response { jwt: encoded_jwt }))
+            Ok(Response { jwt: encoded_jwt })
         }
-        false => Ok(HttpResponse::InternalServerError().finish()),
+        false => Err(Error::BadRequest(ClientError {
+            code: "AUTHENTICATION_FAILED".into(),
+            message: "Wrong email or password.".into(),
+        })),
     }
+}
+
+pub async fn controller(
+    web_db: web::Data<PgPool>,
+    web_jwt: web::Data<Jwt>,
+    web_args: web::Json<Args>,
+) -> Result<HttpResponse, Error> {
+    let result = handler(
+        web_db.get_ref().clone(),
+        web_jwt.get_ref().clone(),
+        web_args.into_inner(),
+    )
+    .await?;
+
+    Ok(HttpResponse::Ok().json(result))
 }

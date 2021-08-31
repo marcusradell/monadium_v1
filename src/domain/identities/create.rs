@@ -1,4 +1,4 @@
-use super::{EventData, EventMeta};
+use super::{sign_in, EventData, EventMeta};
 use crate::io::error::Error;
 use crate::io::jwt::Jwt;
 use crate::io::password;
@@ -8,45 +8,77 @@ use sqlx::types::Json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
+const CREATED: &str = "IDENTITY/CREATED";
+
 #[derive(Deserialize, Debug, Clone)]
 pub struct Args {
     pub email: String,
     pub password: String,
 }
 
-pub async fn handler(args: Args, role: String, db: PgPool, jwt: Jwt) -> Result<String, Error> {
-    let password_hash = password::hash(&args.password)?;
-    let data = Json(EventData {
-        email: args.email.clone(),
-        password_hash,
-        role,
-    });
-
-    let meta = Json(EventMeta {
-        cid: Uuid::new_v4(),
-    });
-
-    let id = Uuid::new_v4();
-
-    sqlx::query!(
-        r#"
-insert into events
-(stream_id, version, type, data, meta) VALUES
-( $1, $2, $3, $4, $5 )
-returning sequence_num
-        "#,
-        id,
-        1,
-        "IDENTITIES/SIGNED_UP",
-        data as _,
-        meta as _
+pub async fn handler(
+    args: Args,
+    role: String,
+    db: PgPool,
+    jwt: Jwt,
+) -> Result<sign_in::Response, Error> {
+    let existing_identity = sqlx::query!(
+        r#"select * from events where type = $1 and data->>'email' = $2 limit 1"#,
+        CREATED,
+        args.email.clone()
     )
-    .fetch_one(&db)
+    .fetch_optional(&db)
     .await?;
 
-    let result = jwt.encode(id.to_string(), args.email)?;
+    match existing_identity {
+        Some(_) => {
+            return sign_in::handler(
+                db,
+                jwt,
+                sign_in::Args {
+                    email: args.email.clone(),
+                    password: args.password,
+                },
+            )
+            .await
+        }
+        None => {
+            let password_hash = password::hash(&args.password)?;
+            let data = Json(EventData {
+                email: args.email.clone(),
+                password_hash,
+                role,
+            });
 
-    Ok(result)
+            let meta = Json(EventMeta {
+                cid: Uuid::new_v4(),
+            });
+
+            let id = Uuid::new_v4();
+
+            sqlx::query!(
+                r#"
+        insert into events
+        (stream_id, version, type, data, meta) VALUES
+        ( $1, $2, $3, $4, $5 )
+        returning sequence_num
+                "#,
+                id,
+                1,
+                CREATED,
+                data as _,
+                meta as _
+            )
+            .fetch_one(&db)
+            .await?;
+
+            let result = sign_in::Response {
+                jwt: jwt.encode(id.to_string(), args.email)?,
+            };
+
+            Ok(result)
+        }
+    }
 }
 
 pub async fn controller(
