@@ -37,10 +37,7 @@ pub struct EventMeta {
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/identities")
-            .route(
-                "/list",
-                web::get().to(|web_db: web::Data<PgPool>| list::handler(web_db.get_ref().clone())),
-            )
+            .route("/list", web::get().to(list::controller))
             .route(
                 "/show",
                 web::get().to(|web_db: web::Data<PgPool>| show::handler(web_db.get_ref().clone())),
