@@ -1,4 +1,5 @@
 use super::error::Error;
+use chrono::offset::Utc;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation};
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -7,7 +8,7 @@ use std::env;
 pub struct Claims {
     pub email: String,
     pub id: String,
-    pub exp: usize,
+    pub exp: i64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -27,8 +28,11 @@ impl Jwt {
     pub fn encode(&self, id: String, email: String) -> Result<String, jsonwebtoken::errors::Error> {
         jsonwebtoken::encode(
             &Header::default(),
-            // TODO: set exp correctly.
-            &Claims { email, id, exp: 10 },
+            &Claims {
+                email,
+                id,
+                exp: Utc::now().timestamp() + 15 * 60,
+            },
             &EncodingKey::from_secret(self.secret.as_ref()),
         )
     }
