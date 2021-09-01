@@ -1,5 +1,9 @@
 use super::Event;
-use crate::io::{error::Error, http, jwt::Jwt};
+use crate::io::{
+    error::{ClientError, Error},
+    http,
+    jwt::Jwt,
+};
 use actix_web::{web, HttpRequest, HttpResponse};
 use sqlx::PgPool;
 
@@ -18,7 +22,17 @@ pub async fn controller(
 ) -> Result<HttpResponse, Error> {
     let bearer_token = http::jwt_from(req)?;
 
-    jwt.decode(bearer_token)?;
+    let claims = jwt.decode(bearer_token)?;
+
+    if claims.role != "OWNER" {
+        return Err(Error::BadRequest(ClientError::new(
+            "ACCESS_DENIED",
+            &format!(
+                "identities/list requires the role \"OWNER\". Found role: {}.",
+                claims.role
+            ),
+        )));
+    }
 
     let result = handler(db.get_ref()).await?;
 

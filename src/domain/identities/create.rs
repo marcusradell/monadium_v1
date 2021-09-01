@@ -47,7 +47,7 @@ pub async fn handler(
             let data = Json(EventData {
                 email: args.email.clone(),
                 password_hash,
-                role,
+                role: role.clone(),
             });
 
             let meta = Json(EventMeta {
@@ -73,7 +73,7 @@ pub async fn handler(
             .await?;
 
             let result = sign_in::Response {
-                jwt: jwt.encode(id.to_string(), args.email)?,
+                jwt: jwt.encode(&id.to_string(), &role, &args.email)?,
             };
 
             Ok(result)

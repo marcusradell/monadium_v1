@@ -6,8 +6,9 @@ use std::env;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
-    pub email: String,
     pub id: String,
+    pub role: String,
+    pub email: String,
     pub exp: i64,
 }
 
@@ -25,12 +26,18 @@ impl Jwt {
         }
     }
 
-    pub fn encode(&self, id: String, email: String) -> Result<String, jsonwebtoken::errors::Error> {
+    pub fn encode(
+        &self,
+        id: &str,
+        role: &str,
+        email: &str,
+    ) -> Result<String, jsonwebtoken::errors::Error> {
         jsonwebtoken::encode(
             &Header::default(),
             &Claims {
-                email,
-                id,
+                id: id.into(),
+                role: role.into(),
+                email: email.into(),
                 exp: Utc::now().timestamp() + 15 * 60,
             },
             &EncodingKey::from_secret(self.secret.as_ref()),
