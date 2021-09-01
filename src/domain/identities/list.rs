@@ -18,9 +18,7 @@ pub async fn controller(
 ) -> Result<HttpResponse, Error> {
     let bearer_token = http::jwt_from(req)?;
 
-    let decoded_token = jwt.decode(bearer_token)?;
-
-    println!("{:?}", decoded_token);
+    jwt.decode(bearer_token)?;
 
     let result = handler(db.get_ref()).await?;
 
