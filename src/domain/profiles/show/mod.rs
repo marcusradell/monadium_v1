@@ -24,10 +24,10 @@ async fn handler(args: Args, _db: PgPool) -> Result<Profile, Error> {
     };
 
     if args.id != marcus_profile.id {
-        return Err(Error::BadRequest(ClientError {
-            code: "NOT_FOUND".into(),
-            message: format!("Could not find ID {}.", args.id),
-        }));
+        return Err(Error::BadRequest(ClientError::new(
+            "NOT_FOUND",
+            &format!("Could not find ID {}.", args.id),
+        )));
     }
 
     let result = marcus_profile;

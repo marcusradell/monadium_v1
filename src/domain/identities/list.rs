@@ -1,5 +1,5 @@
 use super::Event;
-use crate::io::{error::Error, jwt::Jwt};
+use crate::io::{error::Error, http, jwt::Jwt};
 use actix_web::{web, HttpRequest, HttpResponse};
 use sqlx::PgPool;
 
@@ -16,17 +16,9 @@ pub async fn controller(
     jwt: web::Data<Jwt>,
     req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-    // TODO: Fix unwraps.
-    let (_, bearer_token) = req
-        .headers()
-        .get("Authorization")
-        .expect("Missing Authorization header")
-        .to_str()
-        .expect("Can't to_str.")
-        .split_once("Bearer ")
-        .expect("Failed to split on Bearer.");
+    let bearer_token = http::jwt_from(req)?;
 
-    let decoded_token = jwt.decode(bearer_token.into())?;
+    let decoded_token = jwt.decode(bearer_token)?;
 
     println!("{:?}", decoded_token);
 

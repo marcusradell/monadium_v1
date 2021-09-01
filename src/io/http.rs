@@ -1,7 +1,9 @@
 use crate::io::jwt::Jwt;
-use actix_web::{dev::Server, middleware, web, App, HttpServer};
+use actix_web::{dev::Server, http::header, middleware, web, App, HttpRequest, HttpServer};
 use sqlx::PgPool;
 use std::net::TcpListener;
+
+use super::error::{ClientError, Error};
 
 pub struct Http {
     pub port: u16,
@@ -36,4 +38,21 @@ pub async fn init(
     println!("Server started.");
 
     Ok(Http { port, server })
+}
+
+pub fn jwt_from(req: HttpRequest) -> Result<String, Error> {
+    let result = req
+        .headers()
+        .get(header::AUTHORIZATION)
+        .ok_or(Error::BadRequest(ClientError::new("BAD_AUTHORIZATION_HEADER", "Missing the Authorization header. Check the value and try again.")))?
+        .to_str()
+        .map_err(|_| 
+            Error::BadRequest(ClientError::new("BAD_AUTHORIZATION_HEADER",
+                "Failed to parse the Authorization header as an ASCII string. Check the value and try again."))
+        )?
+        .split_once("Bearer ").map(|(_, bearer_token)| {
+bearer_token
+        }).ok_or(Error::BadRequest(ClientError::new("BAD_AUTHORIZATION_HEADER", "Couldn't split the string on 'Bearer '. Check the value and try again.")))?;
+
+    Ok(result.into())
 }

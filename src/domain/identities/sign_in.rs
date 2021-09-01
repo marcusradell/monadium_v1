@@ -28,10 +28,10 @@ pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<Response, Error
     let identity = events
         .iter()
         .find(|&event| event.data.email == args.email)
-        .ok_or(Error::BadRequest(ClientError {
-            code: "AUTHENTICATION_FAILED".into(),
-            message: "Wrong email or password.".into(),
-        }))?;
+        .ok_or(Error::BadRequest(ClientError::new(
+            "AUTHENTICATION_FAILED",
+            "Wrong email or password.",
+        )))?;
 
     let verify_result = password::verify(&identity.data.password_hash, &args.password)?;
 
@@ -40,10 +40,10 @@ pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<Response, Error
             let encoded_jwt = jwt.encode(identity.stream_id.to_string(), args.email.clone())?;
             Ok(Response { jwt: encoded_jwt })
         }
-        false => Err(Error::BadRequest(ClientError {
-            code: "AUTHENTICATION_FAILED".into(),
-            message: "Wrong email or password.".into(),
-        })),
+        false => Err(Error::BadRequest(ClientError::new(
+            "AUTHENTICATION_FAILED",
+            "Wrong email or password.",
+        ))),
     }
 }
 
