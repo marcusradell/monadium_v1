@@ -9,6 +9,7 @@ pub mod list;
 pub mod show;
 pub mod sign_in;
 
+// TODO: Move to an Event Store module.
 #[derive(sqlx::FromRow, Deserialize, Serialize, Debug)]
 pub struct Event {
     sequence_num: i64,
@@ -29,6 +30,7 @@ pub struct EventData {
     pub role: String,
 }
 
+// TODO: Move to an Event Store module.
 #[derive(Serialize, Deserialize, sqlx::FromRow, Debug)]
 pub struct EventMeta {
     pub cid: Uuid,
