@@ -28,7 +28,7 @@ pub async fn controller(
         return Err(Error::BadRequest(ClientError::new(
             "ACCESS_DENIED",
             &format!(
-                "identities/list requires the role \"OWNER\". Found role: {}.",
+                "identities/list requires the role OWNER. Found role: {}.",
                 claims.role
             ),
         )));
