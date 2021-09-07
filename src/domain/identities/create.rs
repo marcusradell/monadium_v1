@@ -23,7 +23,7 @@ pub async fn handler(
     jwt: Jwt,
 ) -> Result<sign_in::Response, Error> {
     let existing_identity = sqlx::query!(
-        r#"select * from events where type = $1 and data->>'email' = $2 limit 1"#,
+        r#"select * from events where event_type = $1 and data->>'email' = $2 limit 1"#,
         CREATED,
         args.email.clone()
     )
@@ -59,7 +59,7 @@ pub async fn handler(
             sqlx::query!(
                 r#"
         insert into events
-        (stream_id, version, type, data, meta) VALUES
+        (stream_id, version, event_type, data, meta) VALUES
         ( $1, $2, $3, $4, $5 )
         returning sequence_num
                 "#,
