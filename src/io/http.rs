@@ -1,4 +1,4 @@
-use crate::io::jwt::Jwt;
+use crate::{domain::identities, io::jwt::Jwt};
 use actix_web::{App, HttpRequest, HttpServer, dev::Server, http::header, middleware, web};
 use std::net::TcpListener;
 use super::{event_store::EventStore, result::{ClientError, Error}};
@@ -11,7 +11,7 @@ pub struct Http {
 pub async fn init(
     port_or_zero: u16,
     jwt: Jwt,
-    event_store: EventStore,
+    event_store: EventStore<identities::EventData>,
     configs: Vec<fn(&mut web::ServiceConfig)>,
 ) -> std::io::Result<Http> {
     let listener: TcpListener = TcpListener::bind(("0.0.0.0", port_or_zero))?;

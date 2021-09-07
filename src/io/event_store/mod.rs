@@ -1,4 +1,7 @@
-use crate::io::result::{Error, Result};
+use crate::{
+    domain::identities::EventData,
+    io::result::{Error, Result},
+};
 use sqlx::postgres::PgPoolOptions;
 
 use self::types::EventStorer;
@@ -7,11 +10,11 @@ pub mod mock;
 pub mod types;
 
 #[derive(Clone)]
-pub struct EventStore {
+pub struct EventStore<T> {
     db: sqlx::PgPool,
 }
 
-impl EventStore {
+impl<T: Clone> EventStore<T> {
     pub async fn new(uri: &str) -> Result<Self> {
         let db = PgPoolOptions::new().connect(uri).await?;
 
@@ -24,7 +27,7 @@ impl EventStore {
     }
 }
 
-impl<T: Clone> EventStorer<T> for EventStore {
+impl<T: Clone> EventStorer<T> for EventStore<T> {
     fn add(&mut self, _event: types::Event<T>) -> Result<()> {
         todo!()
     }
@@ -39,4 +42,18 @@ impl From<sqlx::Error> for Error {
         println!("{:?}", error);
         Error::InternalServerError
     }
+}
+
+pub async fn temp() -> Result<()> {
+    let es: EventStore<EventData> = EventStore::new("").await?;
+
+    es.add(EventData {
+        email: "a".into(),
+        role: "b".into(),
+        password_hash: "c".into(),
+    });
+
+    es.add("This should fail.");
+
+    Ok(())
 }
