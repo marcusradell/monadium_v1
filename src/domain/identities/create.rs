@@ -8,7 +8,7 @@ use sqlx::types::Json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-const CREATED: &str = "IDENTITY/CREATED";
+const EVENT_TYPE: &str = "IDENTITY/CREATED";
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Args {
@@ -24,7 +24,7 @@ pub async fn handler(
 ) -> Result<sign_in::Response, Error> {
     let existing_identity = sqlx::query!(
         r#"select * from events where event_type = $1 and data->>'email' = $2 limit 1"#,
-        CREATED,
+        EVENT_TYPE,
         args.email.clone()
     )
     .fetch_optional(&db)
@@ -65,7 +65,7 @@ pub async fn handler(
                 "#,
                 id,
                 1,
-                CREATED,
+                EVENT_TYPE,
                 data as _,
                 meta as _
             )
