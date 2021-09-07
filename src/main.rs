@@ -17,7 +17,7 @@ async fn main() -> std::io::Result<()> {
 
     let uri = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL.");
 
-    let event_store = io::event_store::EventStore::new(uri).await.unwrap();
+    let event_store = io::event_store::EventStore::new(&uri).await.unwrap();
 
     let http = io::http::init(
         8080,
