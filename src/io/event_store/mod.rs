@@ -11,8 +11,6 @@ pub struct Event<T: Clone> {
     sequence_num: i64,
     stream_id: uuid::Uuid,
     version: i32,
-    #[serde(rename = "type")]
-    #[sqlx(rename = "type")]
     event_type: String,
     data: Json<T>,
     meta: Json<EventMeta>,

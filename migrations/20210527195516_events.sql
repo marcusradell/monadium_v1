@@ -8,7 +8,7 @@ create table if not exists events (
     -- Used to prevent concurrent updates on the same stream.
     version int not null,
     -- Event type, example: identities/new_member_created.
-    type text not null,
+    event_type text not null,
     -- Event payload containing all the state changes.
     data jsonb not null,
     -- Event metadata that helps track the events through our system.
