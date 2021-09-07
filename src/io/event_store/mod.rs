@@ -12,8 +12,8 @@ pub struct EventStore {
 }
 
 impl EventStore {
-    pub async fn new(uri: String) -> Result<Self> {
-        let db = PgPoolOptions::new().connect(&uri).await?;
+    pub async fn new(uri: &str) -> Result<Self> {
+        let db = PgPoolOptions::new().connect(uri).await?;
 
         Ok(Self { db })
     }
