@@ -1,9 +1,7 @@
 use crate::io::jwt::Jwt;
-use actix_web::{dev::Server, http::header, middleware, web, App, HttpRequest, HttpServer};
-use sqlx::PgPool;
+use actix_web::{App, HttpRequest, HttpServer, dev::Server, http::header, middleware, web};
 use std::net::TcpListener;
-
-use super::result::{ClientError, Error};
+use super::{event_store::EventStore, result::{ClientError, Error}};
 
 pub struct Http {
     pub port: u16,
@@ -13,7 +11,7 @@ pub struct Http {
 pub async fn init(
     port_or_zero: u16,
     jwt: Jwt,
-    db: PgPool,
+    event_store: EventStore,
     configs: Vec<fn(&mut web::ServiceConfig)>,
 ) -> std::io::Result<Http> {
     let listener: TcpListener = TcpListener::bind(("0.0.0.0", port_or_zero))?;
@@ -27,7 +25,7 @@ pub async fn init(
 
         App::new()
             .data(jwt.clone())
-            .data(db.clone())
+            .data(event_store.db().clone())
             .wrap(middleware::Logger::default())
             .data(web::JsonConfig::default().limit(4096))
             .service(scope)

@@ -1,4 +1,4 @@
-use super::{Event, EventStorer};
+use super::types::{Event, EventStorer};
 use crate::io::result::Result;
 
 pub struct EventStoreMock<T: Clone> {
@@ -26,7 +26,7 @@ impl<T: Clone> EventStoreMock<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::io::event_store::EventMeta;
+    use crate::io::event_store::types::EventMeta;
     use sqlx::types::Json;
     use uuid::Uuid;
 

@@ -1,4 +1,5 @@
-use super::{sign_in, EventData, EventMeta};
+use super::{sign_in, EventData};
+use crate::io::event_store::types::EventMeta;
 use crate::io::jwt::Jwt;
 use crate::io::password;
 use crate::io::result::Error;

@@ -1,5 +1,5 @@
-use super::Event;
 use crate::io::{
+    event_store::types::Event,
     http,
     jwt::Jwt,
     result::{ClientError, Error},
@@ -7,8 +7,10 @@ use crate::io::{
 use actix_web::{web, HttpRequest, HttpResponse};
 use sqlx::PgPool;
 
-pub async fn handler(db: &PgPool) -> Result<Vec<Event>, Error> {
-    let result = sqlx::query_as::<_, Event>("select * from events")
+use super::EventData;
+
+pub async fn handler(db: &PgPool) -> Result<Vec<Event<EventData>>, Error> {
+    let result = sqlx::query_as::<_, Event<EventData>>("select * from events")
         .fetch_all(db)
         .await?;
 
