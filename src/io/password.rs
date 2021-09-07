@@ -1,4 +1,4 @@
-use crate::io::error::Error;
+use crate::io::result::Error;
 use argon2::Config;
 use rand::Rng;
 

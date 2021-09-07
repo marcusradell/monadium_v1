@@ -1,4 +1,4 @@
-use super::error::{ClientError, Error};
+use super::result::{ClientError, Error};
 
 impl From<uuid::Error> for Error {
     fn from(_: uuid::Error) -> Error {

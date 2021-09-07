@@ -2,7 +2,7 @@ use actix_web::{web, HttpResponse};
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::io::error::{ClientError, Error};
+use crate::io::result::{ClientError, Error};
 
 use super::{Profile, Status};
 

@@ -2,8 +2,9 @@ use actix_web::{HttpResponse, ResponseError};
 use derive_more::Display;
 use serde::Serialize;
 
-#[derive(Debug, Display)]
+pub type Result<T> = std::result::Result<T, Error>;
 
+#[derive(Debug, Display)]
 pub enum Error {
     InternalServerError,
     BadRequest(ClientError),

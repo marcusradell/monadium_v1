@@ -1,7 +1,7 @@
 use super::Event;
-use crate::io::error::{ClientError, Error};
 use crate::io::jwt::Jwt;
 use crate::io::password;
+use crate::io::result::{ClientError, Error};
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;

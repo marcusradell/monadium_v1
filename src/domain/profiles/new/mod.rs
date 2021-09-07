@@ -1,4 +1,4 @@
-use crate::io::error::Error;
+use crate::io::result::Error;
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

@@ -1,4 +1,4 @@
-use super::error::Error;
+use super::result::Error;
 use chrono::offset::Utc;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation};
 use serde::{Deserialize, Serialize};

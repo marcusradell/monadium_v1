@@ -3,7 +3,7 @@ use actix_web::{dev::Server, http::header, middleware, web, App, HttpRequest, Ht
 use sqlx::PgPool;
 use std::net::TcpListener;
 
-use super::error::{ClientError, Error};
+use super::result::{ClientError, Error};
 
 pub struct Http {
     pub port: u16,

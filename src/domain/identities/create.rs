@@ -1,7 +1,7 @@
 use super::{sign_in, EventData, EventMeta};
-use crate::io::error::Error;
 use crate::io::jwt::Jwt;
 use crate::io::password;
+use crate::io::result::Error;
 use actix_web::{web, HttpResponse};
 use serde::Deserialize;
 use sqlx::types::Json;

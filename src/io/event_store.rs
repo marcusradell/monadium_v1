@@ -1,14 +1,13 @@
 use uuid::Uuid;
 
+use super::result::Result;
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Event {
     id: Uuid,
     sequence_num: u64,
     ttype: String,
 }
-
-type Error = Box<dyn std::error::Error>;
-type Result<T> = std::result::Result<T, Error>;
 
 pub trait EventStorer {
     fn add(&mut self, event: Event) -> Result<()>;

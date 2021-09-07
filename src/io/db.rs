@@ -1,4 +1,4 @@
-use crate::io::error::Error;
+use crate::io::result::Error;
 use sqlx::postgres::PgPoolOptions;
 
 impl From<sqlx::Error> for Error {

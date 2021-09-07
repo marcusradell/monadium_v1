@@ -1,8 +1,8 @@
 use super::Event;
 use crate::io::{
-    error::{ClientError, Error},
     http,
     jwt::Jwt,
+    result::{ClientError, Error},
 };
 use actix_web::{web, HttpRequest, HttpResponse};
 use sqlx::PgPool;
