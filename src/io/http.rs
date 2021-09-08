@@ -11,6 +11,9 @@ pub struct Http {
 pub async fn init(
     port_or_zero: u16,
     jwt: Jwt,
+//     the trait bound `EventData: Type<Postgres>` is not satisfied
+// the trait `Type<Postgres>` is not implemented for `EventData`rustcE0277
+// mod.rs(15, 34): required by this bound in `EventStore`
     event_store: EventStore<identities::EventData>,
     configs: Vec<fn(&mut web::ServiceConfig)>,
 ) -> std::io::Result<Http> {

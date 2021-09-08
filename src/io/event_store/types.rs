@@ -1,4 +1,5 @@
 use crate::io::result::Result;
+use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::types::Json;
@@ -20,8 +21,9 @@ pub struct EventMeta {
     pub cid: Uuid,
 }
 
+#[async_trait]
 pub trait EventStorer<T: Clone> {
-    fn add(
+    async fn add(
         &mut self,
         event_type: &str,
         version: i64,
@@ -30,5 +32,5 @@ pub trait EventStorer<T: Clone> {
         cid: Uuid,
     ) -> Result<()>;
 
-    fn list(&self) -> Result<Vec<Event<T>>>;
+    async fn list(&self) -> Result<Vec<Event<T>>>;
 }

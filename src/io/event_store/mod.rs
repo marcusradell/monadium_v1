@@ -1,24 +1,23 @@
-use std::marker::PhantomData;
-
-use crate::{
-    domain::identities::EventData,
-    io::result::{Error, Result},
-};
-use sqlx::postgres::PgPoolOptions;
-use uuid::Uuid;
-
 use self::types::EventStorer;
+use crate::io::{
+    event_store::types::EventMeta,
+    result::{Error, Result},
+};
+use async_trait::async_trait;
+use sqlx::{postgres::PgPoolOptions, types::Json};
+use std::marker::PhantomData;
+use uuid::Uuid;
 
 pub mod mock;
 pub mod types;
 
 #[derive(Clone)]
-pub struct EventStore<T> {
+pub struct EventStore<T: Clone + sqlx::Type<sqlx::Postgres>> {
     db: sqlx::PgPool,
     phantom_type: PhantomData<T>,
 }
 
-impl<T: Clone> EventStore<T> {
+impl<T: Clone + sqlx::Type<sqlx::Postgres>> EventStore<T> {
     pub async fn new(uri: &str) -> Result<Self> {
         let db = PgPoolOptions::new().connect(uri).await?;
 
@@ -34,12 +33,13 @@ impl<T: Clone> EventStore<T> {
     }
 }
 
-impl<T: Clone> EventStorer<T> for EventStore<T> {
-    fn list(&self) -> Result<Vec<types::Event<T>>> {
+#[async_trait]
+impl<T: Clone + sqlx::Type<sqlx::Postgres>> EventStorer<T> for EventStore<T> {
+    async fn list(&self) -> Result<Vec<types::Event<T>>> {
         todo!()
     }
 
-    fn add(
+    async fn add(
         &mut self,
         event_type: &str,
         version: i64,
@@ -47,7 +47,29 @@ impl<T: Clone> EventStorer<T> for EventStore<T> {
         data: T,
         cid: uuid::Uuid,
     ) -> Result<()> {
-        todo!()
+        let meta = Json(EventMeta {
+            cid: Uuid::new_v4(),
+        });
+
+        let id = Uuid::new_v4();
+
+        sqlx::query!(
+            r#"
+    insert into events
+    (stream_id, version, event_type, data, meta) VALUES
+    ( $1, $2, $3, $4, $5 )
+    returning sequence_num
+            "#,
+            id,
+            1,
+            event_type,
+            data as _,
+            meta as _
+        )
+        .fetch_one(&self.db)
+        .await?;
+
+        Ok(())
     }
 }
 
