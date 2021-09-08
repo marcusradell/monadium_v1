@@ -57,21 +57,3 @@ impl From<sqlx::Error> for Error {
         Error::InternalServerError
     }
 }
-
-// TODO: Remove.
-pub async fn temp() -> Result<()> {
-    let mut es: EventStore<EventData> = EventStore::new("").await?;
-
-    es.add(
-        "IT_WORKED",
-        1,
-        Uuid::from_u128(1),
-        EventData {
-            email: "a".into(),
-            role: "b".into(),
-            password_hash: "c".into(),
-        },
-        Uuid::from_u128(2),
-    )?;
-    Ok(())
-}
