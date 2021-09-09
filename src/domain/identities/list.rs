@@ -10,7 +10,7 @@ use sqlx::PgPool;
 use super::EventData;
 
 pub async fn handler(db: &PgPool) -> Result<Vec<Event<EventData>>, Error> {
-    let result = sqlx::query_as::<_, Event<EventData>>("select * from events")
+    let result = sqlx::query_as::<_, Event<EventData>>("select * from identities.events")
         .fetch_all(db)
         .await?;
 

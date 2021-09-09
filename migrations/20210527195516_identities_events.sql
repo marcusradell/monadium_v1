@@ -1,5 +1,7 @@
--- Single table for all events in the app.
-create table if not exists events (
+
+create schema if not exists identities;
+
+create table if not exists identities.events (
     -- Used to order events.
     sequence_num bigserial not null,
     -- ID for the events that belong together,
@@ -22,4 +24,4 @@ create table if not exists events (
 );
 
 -- Helps us to query for all the events for a specific stream.
-CREATE INDEX idx_event_stream_id ON events (stream_id);
+CREATE INDEX idx_event_stream_id ON identities.events (stream_id);
