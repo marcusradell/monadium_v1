@@ -9,7 +9,7 @@ use sqlx::types::Json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-const EVENT_TYPE: &str = "IDENTITY/CREATED";
+const EVENT_TYPE: &str = "IDENTITIES/CREATED";
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Args {

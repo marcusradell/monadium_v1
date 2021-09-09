@@ -14,6 +14,7 @@ pub async fn handler(db: &PgPool) -> Result<Vec<Event<EventData>>, Error> {
         .fetch_all(db)
         .await?;
 
+    // We only support a single CREATED event, so no reduction is needed.
     Ok(result)
 }
 

@@ -21,7 +21,7 @@ pub struct Response {
 
 pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<Response, Error> {
     let events = sqlx::query_as::<_, Event<EventData>>(
-        "select * from events where data->>'email' = $1 order by sequence_num asc",
+        "select * from identities.events where data->>'email' = $1 order by sequence_num asc",
     )
     .bind(args.email.clone())
     .fetch_all(&db)
