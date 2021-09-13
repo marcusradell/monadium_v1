@@ -1,4 +1,4 @@
-use super::{sign_in, CreatedData};
+use super::{repo::Repo, sign_in, CreatedData};
 use crate::io::jwt::Jwt;
 use crate::io::password;
 use crate::io::result::Error;
@@ -18,16 +18,13 @@ pub async fn handler(
     role: String,
     db: PgPool,
     jwt: Jwt,
+    repo: Repo,
 ) -> Result<sign_in::Response, Error> {
-    // TODO: Inject it. Then trait it (scary!).
-    let repo = super::repo::Repo::new(&db);
-    dbg!("000");
     let exists = repo.exists_by_email(&args.email).await?;
 
     match exists {
         // Email found, try signing them in instead of creating a new identity.
         Some(_) => {
-            dbg!("111");
             return sign_in::handler(
                 db,
                 jwt,
@@ -47,7 +44,6 @@ pub async fn handler(
             };
             let cid = Uuid::new_v4();
             let id = Uuid::new_v4();
-            dbg!("222");
             repo.create(id, data, cid).await?;
             let result = sign_in::Response {
                 jwt: jwt.encode(&id.to_string(), &role, &args.email)?,
@@ -62,6 +58,7 @@ pub async fn controller(
     args: web::Json<Args>,
     db: web::Data<PgPool>,
     jwt: web::Data<Jwt>,
+    repo: web::Data<Repo>,
 ) -> Result<HttpResponse, Error> {
     let owner_email =
         std::env::var("IDENTITIES_OWNER_EMAIL").expect("Missing IDENTITIES_OWNER_EMAIL.");
@@ -82,6 +79,7 @@ pub async fn controller(
         role.into(),
         db.get_ref().clone(),
         jwt.get_ref().clone(),
+        repo.get_ref().clone(),
     )
     .await?;
     Ok(HttpResponse::Ok().json(result))

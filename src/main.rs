@@ -17,12 +17,17 @@ async fn main() -> std::io::Result<()> {
 
     let uri = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL.");
 
-    let event_store = io::event_store::EventStore::new(&uri).await.unwrap();
+    // TODO: Deprecate or merge with how the identities_repo work now.
+    let es = io::event_store::EventStore::new(&uri).await.unwrap();
+    let db = es.db().clone();
+    // TODO: This should replace the EventStore.
+    let identities_repo = domain::identities::repo::Repo::new(&db);
 
     let http = io::http::init(
         8080,
         jwt,
-        event_store,
+        db,
+        identities_repo,
         vec![
             domain::health::config,
             domain::profiles::config,

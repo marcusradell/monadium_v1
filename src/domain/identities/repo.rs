@@ -6,6 +6,7 @@ use super::CreatedData;
 
 const EVENT_TYPE: &str = "IDENTITIES/CREATED";
 
+#[derive(Clone)]
 pub struct Repo {
     db: PgPool,
 }
