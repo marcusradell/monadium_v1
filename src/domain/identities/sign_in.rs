@@ -6,7 +6,7 @@ use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
-use super::EventData;
+use super::CreatedData;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Args {
@@ -20,13 +20,14 @@ pub struct Response {
 }
 
 pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<Response, Error> {
-    let events = sqlx::query_as::<_, Event<EventData>>(
+    dbg!("444");
+    let events = sqlx::query_as::<_, Event<CreatedData>>(
         "select * from identities.events where data->>'email' = $1 order by sequence_num asc",
     )
     .bind(args.email.clone())
     .fetch_all(&db)
     .await?;
-
+    dbg!("555");
     let identity = events
         .iter()
         .find(|&event| event.data.email == args.email)

@@ -7,10 +7,10 @@ use crate::io::{
 use actix_web::{web, HttpRequest, HttpResponse};
 use sqlx::PgPool;
 
-use super::EventData;
+use super::CreatedData;
 
-pub async fn handler(db: &PgPool) -> Result<Vec<Event<EventData>>, Error> {
-    let result = sqlx::query_as::<_, Event<EventData>>("select * from identities.events")
+pub async fn handler(db: &PgPool) -> Result<Vec<Event<CreatedData>>, Error> {
+    let result = sqlx::query_as::<_, Event<CreatedData>>("select * from identities.events")
         .fetch_all(db)
         .await?;
 

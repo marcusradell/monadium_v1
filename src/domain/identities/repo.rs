@@ -2,7 +2,7 @@ use crate::io::result::Result;
 use sqlx::{types::Json, PgPool};
 use uuid::Uuid;
 
-use super::EventData;
+use super::CreatedData;
 
 const EVENT_TYPE: &str = "IDENTITIES/CREATED";
 
@@ -15,7 +15,7 @@ impl Repo {
         Self { db: db.clone() }
     }
 
-    pub async fn create(&self, id: Uuid, data: EventData, cid: Uuid) -> Result<()> {
+    pub async fn create(&self, id: Uuid, data: CreatedData, cid: Uuid) -> Result<()> {
         let data = Json(data);
 
         sqlx::query!(
@@ -35,5 +35,17 @@ impl Repo {
         .await?;
 
         Ok(())
+    }
+
+    pub async fn exists_by_email(&self, email: &str) -> Result<Option<()>> {
+        let result = sqlx::query!(
+            r#"select * from identities.events where event_type = $1 and data->>'email' = $2 limit 1"#,
+            EVENT_TYPE,
+            email.clone()
+        )
+        .fetch_optional(&self.db)
+        .await?;
+
+        Ok(result.and(Some(())))
     }
 }

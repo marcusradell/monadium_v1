@@ -1,4 +1,4 @@
-use super::EventData;
+use super::CreatedData;
 use crate::io::{
     event_store::types::Event,
     result::{ClientError, Error},
@@ -13,8 +13,8 @@ pub struct Args {
     id: Uuid,
 }
 
-pub async fn handler(db: &PgPool, args: Args) -> Result<Event<EventData>, Error> {
-    let result = sqlx::query_as::<_, Event<EventData>>(
+pub async fn handler(db: &PgPool, args: Args) -> Result<Event<CreatedData>, Error> {
+    let result = sqlx::query_as::<_, Event<CreatedData>>(
         "select * from identities.events where event_type = IDENTITIES/CREATED and stream_id = $1",
     )
     .fetch_all(db)

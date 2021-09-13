@@ -7,7 +7,7 @@ pub mod repo;
 pub mod show;
 pub mod sign_in;
 #[derive(Serialize, Deserialize, sqlx::FromRow, Debug, Clone)]
-pub struct EventData {
+pub struct CreatedData {
     pub email: String,
     pub password_hash: String,
     pub role: String,

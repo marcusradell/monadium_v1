@@ -26,7 +26,6 @@ impl<T: Clone> EventStoreMock<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::io::event_store::types::EventMeta;
     use sqlx::types::Json;
     use uuid::Uuid;
 
@@ -36,9 +35,7 @@ mod test {
             stream_id: Uuid::from_u128(1),
             sequence_num: 1,
             event_type: "DO_THING".into(),
-            meta: Json(EventMeta {
-                cid: Uuid::from_u128(100),
-            }),
+            cid: Uuid::from_u128(100),
             data: Json("data".into()),
             version: 1,
             inserted_at: chrono::Utc::now(),
