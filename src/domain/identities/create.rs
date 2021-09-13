@@ -1,11 +1,9 @@
 use super::{sign_in, EventData};
-use crate::io::event_store::types::EventMeta;
 use crate::io::jwt::Jwt;
 use crate::io::password;
 use crate::io::result::Error;
 use actix_web::{web, HttpResponse};
 use serde::Deserialize;
-use sqlx::types::Json;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -45,33 +43,19 @@ pub async fn handler(
         }
         None => {
             let password_hash = password::hash(&args.password)?;
-            let data = Json(EventData {
+            let data = EventData {
                 email: args.email.clone(),
                 password_hash,
                 role: role.clone(),
-            });
+            };
 
-            let meta = Json(EventMeta {
-                cid: Uuid::new_v4(),
-            });
+            let cid = Uuid::new_v4();
 
             let id = Uuid::new_v4();
 
-            sqlx::query!(
-                r#"
-        insert into identities.events
-        (stream_id, version, event_type, data, meta) VALUES
-        ( $1, $2, $3, $4, $5 )
-        returning sequence_num
-                "#,
-                id,
-                1,
-                EVENT_TYPE,
-                data as _,
-                meta as _
-            )
-            .fetch_one(&db)
-            .await?;
+            // TODO: Inject it. Then trait it (scary!).
+            let repo = super::repo::Repo::new(&db);
+            repo.create(id, data, cid).await?;
 
             let result = sign_in::Response {
                 jwt: jwt.encode(&id.to_string(), &role, &args.email)?,

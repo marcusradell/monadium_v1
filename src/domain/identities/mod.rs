@@ -3,9 +3,9 @@ use serde::{Deserialize, Serialize};
 
 pub mod create;
 pub mod list;
+pub mod repo;
 pub mod show;
 pub mod sign_in;
-
 #[derive(Serialize, Deserialize, sqlx::FromRow, Debug, Clone)]
 pub struct EventData {
     pub email: String,

@@ -14,7 +14,7 @@ create table if not exists identities.events (
     -- Event payload containing all the state changes.
     data jsonb not null,
     -- Event metadata that helps track the events through our system.
-    meta jsonb not null,
+    cid uuid not null,
     -- When the event got inserted into the DB.
     inserted_at timestamptz not null default now(),
     -- We primarily want to query the events in sequence.
