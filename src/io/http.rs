@@ -25,6 +25,14 @@ pub async fn init(
             scope = scope.configure(config);
         }
 
+
+        let deps_experiment = crate::domain::deps_experiment::Deps {
+            fake_db: "db".into(),
+            fake_mq: "mq".into(),
+        };
+
+        scope = scope.configure( |cfg|deps_experiment.config(cfg));
+
         App::new()
             .data(jwt.clone())
             .data(db.clone())
