@@ -23,6 +23,11 @@ async fn main() -> std::io::Result<()> {
     // TODO: This should replace the EventStore.
     let identities_repo = domain::identities::repo::Repo::new(&db);
 
+    let deps_experiment = crate::domain::deps_experiment::Deps {
+        fake_db: "db".into(),
+        fake_mq: "mq".into(),
+    };
+
     let http = io::http::init(
         8080,
         jwt,
@@ -33,6 +38,7 @@ async fn main() -> std::io::Result<()> {
             domain::profiles::config,
             domain::identities::config,
         ],
+        deps_experiment,
     )
     .await?;
 

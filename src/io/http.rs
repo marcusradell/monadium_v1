@@ -1,4 +1,4 @@
-use crate::{domain::identities, io::jwt::Jwt};
+use crate::{domain::{deps_experiment, identities}, io::jwt::Jwt};
 use actix_web::{App, HttpRequest, HttpServer, dev::Server, http::header, middleware, web};
 use sqlx::PgPool;
 use std::net::TcpListener;
@@ -15,6 +15,7 @@ pub async fn init(
     db: PgPool,
     identities_repo: identities::repo::Repo,
     configs: Vec<fn(&mut web::ServiceConfig)>,
+    deps_experiment: deps_experiment::Deps
 ) -> std::io::Result<Http> {
     let listener: TcpListener = TcpListener::bind(("0.0.0.0", port_or_zero))?;
     let port = listener.local_addr()?.port();
@@ -26,10 +27,6 @@ pub async fn init(
         }
 
 
-        let deps_experiment = crate::domain::deps_experiment::Deps {
-            fake_db: "db".into(),
-            fake_mq: "mq".into(),
-        };
 
         scope = scope.configure( |cfg|deps_experiment.config(cfg));
 

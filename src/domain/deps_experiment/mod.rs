@@ -3,6 +3,7 @@ use actix_web::{web, HttpResponse};
 use serde::Deserialize;
 use uuid::Uuid;
 
+#[derive(Clone)]
 pub struct Deps {
     pub fake_db: String,
     pub fake_mq: String,
