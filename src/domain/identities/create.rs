@@ -1,4 +1,7 @@
-use super::{repo::Repo, sign_in, CreatedData};
+use super::{
+    repo::{Repo, RepoCreate},
+    sign_in, CreatedData,
+};
 use crate::io::jwt::Jwt;
 use crate::io::password;
 use crate::io::result::Error;
@@ -18,7 +21,7 @@ pub async fn handler(
     role: String,
     db: PgPool,
     jwt: Jwt,
-    repo: Repo,
+    repo: &mut Repo,
 ) -> Result<sign_in::Response, Error> {
     let exists = repo.exists_by_email(&args.email).await?;
 
@@ -79,8 +82,20 @@ pub async fn controller(
         role.into(),
         db.get_ref().clone(),
         jwt.get_ref().clone(),
-        repo.get_ref().clone(),
+        &mut repo.get_ref().clone(),
     )
     .await?;
     Ok(HttpResponse::Ok().json(result))
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        // TODO: remove db as a dep in the sign_in handler and then in the create handler
+        // let result = handler(Args{ email: "email@example.com".into(), password: "password".into() }, "MEMBER".into(), )
+        let result = vec!["todo"];
+
+        assert_eq!(result, vec!["todo"])
+    }
 }

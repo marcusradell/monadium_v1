@@ -2,6 +2,7 @@ use crate::io::{
     event_store::types::Event,
     result::{Error, Result},
 };
+use async_trait::async_trait;
 use sqlx::{types::Json, PgPool};
 use uuid::Uuid;
 
@@ -11,17 +12,34 @@ const EVENT_TYPE: &str = "IDENTITIES/CREATED";
 
 type CreatedEvent = Event<CreatedData>;
 
+#[async_trait]
+pub trait RepoCreate {
+    // TODO: Do I need to make self &mut when the real implementation only needs &self?
+    async fn create(&mut self, id: Uuid, data: CreatedData, cid: Uuid) -> Result<()>;
+}
+
+pub struct RepoMock {
+    data: Vec<String>,
+}
+
+#[async_trait]
+impl RepoCreate for RepoMock {
+    async fn create(&mut self, id: Uuid, data: CreatedData, cid: Uuid) -> Result<()> {
+        self.data
+            .push(format!("id: {:?}, data: {:?}, cid: {:?}", id, data, cid));
+
+        Ok(())
+    }
+}
+
 #[derive(Clone)]
 pub struct Repo {
     db: PgPool,
 }
 
-impl Repo {
-    pub fn new(db: &PgPool) -> Self {
-        Self { db: db.clone() }
-    }
-
-    pub async fn create(&self, id: Uuid, data: CreatedData, cid: Uuid) -> Result<()> {
+#[async_trait]
+impl RepoCreate for Repo {
+    async fn create(&mut self, id: Uuid, data: CreatedData, cid: Uuid) -> Result<()> {
         let data = Json(data);
 
         sqlx::query!(
@@ -41,6 +59,12 @@ impl Repo {
         .await?;
 
         Ok(())
+    }
+}
+
+impl Repo {
+    pub fn new(db: &PgPool) -> Self {
+        Self { db: db.clone() }
     }
 
     pub async fn exists_by_email(&self, email: &str) -> Result<Option<()>> {
