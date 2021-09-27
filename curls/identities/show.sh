@@ -2,7 +2,7 @@
 
 . ./curls/base.sh
 
-$ID=$1
+ID=$1
 
 curl \
 -H "Content-Type: application/json" \

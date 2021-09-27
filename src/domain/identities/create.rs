@@ -46,7 +46,7 @@ pub async fn handler(
             let id = Uuid::new_v4();
             repo.create(id, data, cid).await?;
             let result = sign_in::Response {
-                jwt: jwt.encode(&id.to_string(), &role, &args.email)?,
+                jwt: jwt.encode(&id, &role, &args.email)?,
             };
 
             Ok(result)

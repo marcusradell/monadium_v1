@@ -7,10 +7,11 @@ use jsonwebtoken::{
 };
 use serde::{Deserialize, Serialize};
 use std::env;
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
-    pub id: String,
+    pub id: Uuid,
     pub role: String,
     pub email: String,
     pub exp: i64,
@@ -32,14 +33,14 @@ impl Jwt {
 
     pub fn encode(
         &self,
-        id: &str,
+        id: &Uuid,
         role: &str,
         email: &str,
     ) -> Result<String, jsonwebtoken::errors::Error> {
         jsonwebtoken::encode(
             &Header::default(),
             &Claims {
-                id: id.into(),
+                id: *id,
                 role: role.into(),
                 email: email.into(),
                 exp: Utc::now().timestamp() + 15 * 60,

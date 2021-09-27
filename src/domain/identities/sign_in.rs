@@ -39,7 +39,7 @@ pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<Response, Error
     match verify_result {
         true => {
             let encoded_jwt = jwt.encode(
-                &identity.stream_id.to_string(),
+                &identity.stream_id,
                 &identity.data.role,
                 &args.email.clone(),
             )?;
