@@ -29,14 +29,14 @@ impl Deps {
                 .route(
                     "/view/{id}",
                     web::get().to(move |args: web::Path<ViewArgs>| {
-                        list(args.id, db.clone());
+                        list(args.id, db.clone()).unwrap();
                         HttpResponse::Ok()
                     }),
                 )
                 .route(
                     "/create",
                     web::get().to(move || {
-                        create(db2.clone());
+                        create(db2.clone()).unwrap();
                         HttpResponse::Ok()
                     }),
                 ),
