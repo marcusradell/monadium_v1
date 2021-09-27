@@ -1,6 +1,10 @@
+use crate::io::result::ClientError;
+
 use super::result::Error;
 use chrono::offset::Utc;
-use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation};
+use jsonwebtoken::{
+    errors as jwt_errors, Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation,
+};
 use serde::{Deserialize, Serialize};
 use std::env;
 
@@ -56,7 +60,16 @@ impl Jwt {
 }
 
 impl From<jsonwebtoken::errors::Error> for Error {
-    fn from(_error: jsonwebtoken::errors::Error) -> Error {
-        Error::InternalServerError
+    fn from(error: jsonwebtoken::errors::Error) -> Error {
+        match *error.kind() {
+            jwt_errors::ErrorKind::ExpiredSignature => Error::BadRequest(ClientError::new(
+                "IO/JWT/EXPIRED",
+                "Your JWT has expired. Please sign in again to receive and new one.",
+            )),
+            _ => Error::BadRequest(ClientError::new(
+                "IO/JWT/EXCEPTION",
+                "Something went wrong with the JWT. Please contact us for further assistance.",
+            )),
+        }
     }
 }
