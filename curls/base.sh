@@ -7,4 +7,6 @@ else
     export BASE_URL="http://localhost:8080";
 fi
 
-export AUTH="Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjgwNWQ1ZmZmLWQ5OGMtNDk2OS1iZTUwLTVjYjY0YjM1ZWQzYyIsInJvbGUiOiJPV05FUiIsImVtYWlsIjoibWFyY3VzQHJhZGVsbC5uZXQiLCJleHAiOjE2MzI3MzQ1MTB9.6fb90fnR6m2mxkb-kMs3atFG2L2rXtMBJflqQefuF4U"
+# Usage example: export TOKEN=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjBiOWI5ODBiLWFiYjItNDlhNS1hZGViLWY1YTcwYjM0MTJmNSIsInJvbGUiOiJNRU1CRVIiLCJlbWFpbCI6Im1hcmN1cyttZW1iZXJAcmFkZWxsLm5ldCIsImV4cCI6MTYzMjc1MDU4Mn0.EfUTOfBlcYZo-2R2knTZOBoYrdcjfZ0lrcliUk_r7PE
+# Create an identity to get a valid token.
+export AUTH="Authorization: Bearer $TOKEN"

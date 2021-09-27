@@ -1,6 +1,5 @@
-use super::CreatedData;
+use super::repo::Repo;
 use crate::io::{
-    event_store::types::Event,
     http,
     jwt::Jwt,
     result::{ClientError, Error},
@@ -8,17 +7,12 @@ use crate::io::{
 use actix_web::{web, HttpRequest, HttpResponse};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::{types::Json, PgPool};
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize)]
 pub struct Args {
     id: Uuid,
 }
-
-const EVENT_TYPE: &str = "IDENTITIES/CREATED";
-
-type CreatedEvent = Event<CreatedData>;
 
 #[derive(Serialize)]
 pub struct Identity {
@@ -29,28 +23,8 @@ pub struct Identity {
     role: String,
 }
 
-pub async fn handler(db: &PgPool, args: Args) -> Result<Identity, Error> {
-    let result = sqlx::query_as!(
-        CreatedEvent,
-        r#"select
-        stream_id,
-        sequence_num,
-        version,
-        event_type,
-        cid,
-        inserted_at,
-        data as "data: Json<CreatedData>"
-        from identities.events
-        where
-        event_type = $1 and
-        stream_id = $2
-        limit 1"#,
-        EVENT_TYPE,
-        args.id.clone()
-    )
-    .fetch_optional(db)
-    .await?
-    .ok_or(Error::InternalServerError)?;
+pub async fn handler(repo: &Repo, args: Args) -> Result<Identity, Error> {
+    let result = repo.show(&args.id).await?;
 
     Ok(Identity {
         id: result.stream_id,
@@ -64,7 +38,7 @@ pub async fn handler(db: &PgPool, args: Args) -> Result<Identity, Error> {
 pub async fn controller(
     jwt: web::Data<Jwt>,
     req: HttpRequest,
-    db: web::Data<PgPool>,
+    repo: web::Data<Repo>,
     query: web::Path<Args>,
 ) -> Result<HttpResponse, Error> {
     let bearer_token = http::jwt_from(req)?;
@@ -81,7 +55,7 @@ pub async fn controller(
         )));
     }
 
-    let result = handler(&db.get_ref().clone(), query.into_inner()).await?;
+    let result = handler(&repo, query.into_inner()).await?;
 
     Ok(HttpResponse::Ok().json(result))
 }

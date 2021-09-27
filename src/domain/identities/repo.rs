@@ -1,10 +1,15 @@
-use crate::io::result::Result;
+use crate::io::{
+    event_store::types::Event,
+    result::{Error, Result},
+};
 use sqlx::{types::Json, PgPool};
 use uuid::Uuid;
 
 use super::CreatedData;
 
 const EVENT_TYPE: &str = "IDENTITIES/CREATED";
+
+type CreatedEvent = Event<CreatedData>;
 
 #[derive(Clone)]
 pub struct Repo {
@@ -48,5 +53,29 @@ impl Repo {
         .await?;
 
         Ok(result.and(Some(())))
+    }
+
+    pub async fn show(&self, id: &Uuid) -> Result<Event<CreatedData>> {
+        sqlx::query_as!(
+            CreatedEvent,
+            r#"select
+            stream_id,
+            sequence_num,
+            version,
+            event_type,
+            cid,
+            inserted_at,
+            data as "data: Json<CreatedData>"
+            from identities.events
+            where
+            event_type = $1 and
+            stream_id = $2
+            limit 1"#,
+            EVENT_TYPE,
+            id
+        )
+        .fetch_optional(&self.db)
+        .await?
+        .ok_or(Error::InternalServerError)
     }
 }
