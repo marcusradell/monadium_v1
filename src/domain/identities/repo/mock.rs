@@ -27,7 +27,7 @@ impl RepoMock {
                 inserted_at: "2021-01-31T23:59:30Z".parse().unwrap(),
                 data: Json(CreatedData {
                     email: "existing_user@example.com".into(),
-                    password_hash: password::hash("password_hash").unwrap().into(),
+                    password_hash: password::hash_mock("password_hash").unwrap().into(),
                     role: "MEMBER".into(),
                 }),
             }],
