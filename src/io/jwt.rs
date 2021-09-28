@@ -31,6 +31,7 @@ impl Jwt {
         }
     }
 
+    #[allow(dead_code)]
     pub fn from_secret(secret: &str) -> Self {
         Jwt {
             secret: secret.to_string(),
