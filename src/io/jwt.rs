@@ -31,6 +31,12 @@ impl Jwt {
         }
     }
 
+    pub fn from_secret(secret: &str) -> Self {
+        Jwt {
+            secret: secret.to_string(),
+        }
+    }
+
     pub fn encode(
         &self,
         id: &Uuid,

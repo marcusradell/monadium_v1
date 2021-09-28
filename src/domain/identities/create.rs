@@ -83,15 +83,3 @@ pub async fn controller(
     .await?;
     Ok(HttpResponse::Ok().json(result))
 }
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        // TODO: remove db as a dep in the sign_in handler and then in the create handler
-        // let result = handler(Args{ email: "email@example.com".into(), password: "password".into() }, "MEMBER".into(), )
-        let result = vec!["todo"];
-
-        assert_eq!(result, vec!["todo"])
-    }
-}

@@ -1,4 +1,4 @@
-use super::repo::Repo;
+use super::repo::{Repo, RepoFindByEmail};
 use crate::io::jwt::Jwt;
 use crate::io::password;
 use crate::io::result::{ClientError, Error};
@@ -11,12 +11,16 @@ pub struct Args {
     pub password: String,
 }
 
-#[derive(serde::Serialize, Debug)]
+#[derive(serde::Serialize, Debug, PartialEq)]
 pub struct Response {
     pub jwt: String,
 }
 
-pub async fn handler(repo: &mut Repo, jwt: Jwt, args: Args) -> Result<Response, Error> {
+pub async fn handler(
+    repo: &mut impl RepoFindByEmail,
+    jwt: Jwt,
+    args: Args,
+) -> Result<Response, Error> {
     let identity = repo
         .find_by_email(&args.email)
         .await?
@@ -56,4 +60,35 @@ pub async fn controller(
     .await?;
 
     Ok(HttpResponse::Ok().json(result))
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::domain::identities::repo::RepoMock;
+
+    #[actix_rt::test]
+    async fn not_found() {
+        use super::*;
+
+        let mut repo = RepoMock::new();
+        let jwt = Jwt::from_secret("secret");
+
+        let result = handler(
+            &mut repo,
+            jwt,
+            Args {
+                email: "email@example.com".into(),
+                password: "password".into(),
+            },
+        )
+        .await;
+
+        assert_eq!(
+            result.unwrap_err(),
+            Error::BadRequest(ClientError::new(
+                "NOT_FOUND",
+                "Could not find an identity with email email@example.com"
+            ))
+        )
+    }
 }

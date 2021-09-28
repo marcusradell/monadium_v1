@@ -18,8 +18,19 @@ pub trait RepoCreate {
     async fn create(&mut self, id: Uuid, data: CreatedData, cid: Uuid) -> Result<()>;
 }
 
+#[async_trait]
+pub trait RepoFindByEmail {
+    async fn find_by_email(&mut self, email: &str) -> Result<Option<Event<CreatedData>>>;
+}
+
 pub struct RepoMock {
     data: Vec<String>,
+}
+
+impl RepoMock {
+    pub fn new() -> Self {
+        RepoMock { data: vec![] }
+    }
 }
 
 #[async_trait]
@@ -29,6 +40,15 @@ impl RepoCreate for RepoMock {
             .push(format!("id: {:?}, data: {:?}, cid: {:?}", id, data, cid));
 
         Ok(())
+    }
+}
+
+#[async_trait]
+impl RepoFindByEmail for RepoMock {
+    async fn find_by_email(&mut self, email: &str) -> Result<Option<Event<CreatedData>>> {
+        self.data.push(format!("email: {:?}", email));
+
+        Ok(None)
     }
 }
 
@@ -59,6 +79,30 @@ impl RepoCreate for Repo {
         .await?;
 
         Ok(())
+    }
+}
+
+#[async_trait]
+impl RepoFindByEmail for Repo {
+    async fn find_by_email(&mut self, email: &str) -> Result<Option<Event<CreatedData>>> {
+        Ok(sqlx::query_as!(
+            FindByEmailResult,
+            r#"select
+            stream_id,
+            sequence_num,
+            version,
+            event_type,
+            cid,
+            inserted_at,
+            data as "data: Json<CreatedData>"
+            from identities.events
+            where
+            data->>'email' = $1
+            order by sequence_num asc"#,
+            email
+        )
+        .fetch_optional(&self.db)
+        .await?)
     }
 }
 
@@ -101,27 +145,6 @@ impl Repo {
         .fetch_optional(&self.db)
         .await?
         .ok_or(Error::InternalServerError)
-    }
-
-    pub async fn find_by_email(&self, email: &str) -> Result<Option<Event<CreatedData>>> {
-        Ok(sqlx::query_as!(
-            FindByEmailResult,
-            r#"select
-            stream_id,
-            sequence_num,
-            version,
-            event_type,
-            cid,
-            inserted_at,
-            data as "data: Json<CreatedData>"
-            from identities.events
-            where
-            data->>'email' = $1
-            order by sequence_num asc"#,
-            email
-        )
-        .fetch_optional(&self.db)
-        .await?)
     }
 }
 

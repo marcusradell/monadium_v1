@@ -4,13 +4,13 @@ use serde::Serialize;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug, Display)]
+#[derive(Debug, Display, PartialEq)]
 pub enum Error {
     InternalServerError,
     BadRequest(ClientError),
 }
 
-#[derive(Debug, Display, Serialize)]
+#[derive(Debug, Display, Serialize, PartialEq)]
 #[display(fmt = "[{}]:{}", code, message)]
 pub struct ClientError {
     message: String,
