@@ -7,7 +7,6 @@ use crate::io::password;
 use crate::io::result::Error;
 use actix_web::{web, HttpResponse};
 use serde::Deserialize;
-use sqlx::PgPool;
 use uuid::Uuid;
 
 #[derive(Deserialize, Debug, Clone)]
