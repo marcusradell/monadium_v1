@@ -7,6 +7,7 @@ use crate::io::jwt::Jwt;
 use crate::io::password;
 use crate::io::result::Error;
 use actix_web::{web, HttpResponse};
+use chrono::Utc;
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -30,6 +31,7 @@ pub async fn handler(
             return sign_in::handler(
                 repo,
                 jwt,
+                Utc::now().timestamp(),
                 sign_in::Args {
                     email: args.email.clone(),
                     password: args.password,
@@ -48,7 +50,7 @@ pub async fn handler(
             let id = Uuid::new_v4();
             repo.create(id, data, cid).await?;
             let result = sign_in::Response {
-                jwt: jwt.encode(&id, &role, &args.email)?,
+                jwt: jwt.encode(&id, &role, &args.email, Utc::now().timestamp())?,
             };
 
             Ok(result)

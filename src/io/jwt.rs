@@ -1,7 +1,5 @@
-use crate::io::result::ClientError;
-
 use super::result::Error;
-use chrono::offset::Utc;
+use crate::io::result::ClientError;
 use jsonwebtoken::{
     errors as jwt_errors, Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation,
 };
@@ -9,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::env;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Claims {
     pub id: Uuid,
     pub role: String,
@@ -19,7 +17,7 @@ pub struct Claims {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Jwt {
-    pub secret: String,
+    secret: String,
 }
 
 impl Jwt {
@@ -43,6 +41,7 @@ impl Jwt {
         id: &Uuid,
         role: &str,
         email: &str,
+        now: i64,
     ) -> Result<String, jsonwebtoken::errors::Error> {
         jsonwebtoken::encode(
             &Header::default(),
@@ -50,7 +49,7 @@ impl Jwt {
                 id: *id,
                 role: role.into(),
                 email: email.into(),
-                exp: Utc::now().timestamp() + 15 * 60,
+                exp: now + 15 * 60,
             },
             &EncodingKey::from_secret(self.secret.as_ref()),
         )
