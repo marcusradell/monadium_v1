@@ -1,17 +1,11 @@
 use actix_web::web;
-use serde::{Deserialize, Serialize};
 
 pub mod create;
 pub mod list;
 pub mod repo;
 pub mod show;
 pub mod sign_in;
-#[derive(Serialize, Deserialize, sqlx::FromRow, Debug, Clone)]
-pub struct CreatedData {
-    pub email: String,
-    pub password_hash: String,
-    pub role: String,
-}
+pub mod types;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(

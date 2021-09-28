@@ -1,6 +1,7 @@
 use super::{
     repo::{Repo, RepoCreate},
-    sign_in, CreatedData,
+    sign_in,
+    types::CreatedData,
 };
 use crate::io::jwt::Jwt;
 use crate::io::password;

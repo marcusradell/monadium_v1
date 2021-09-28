@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use crate::io::{
     event_store::types::Event,
     password,
@@ -9,11 +7,7 @@ use async_trait::async_trait;
 use sqlx::{types::Json, PgPool};
 use uuid::Uuid;
 
-use super::CreatedData;
-
-const EVENT_TYPE: &str = "IDENTITIES/CREATED";
-
-type CreatedEvent = Event<CreatedData>;
+use super::types::{CreatedData, CreatedEvent, EVENT_TYPE};
 
 #[async_trait]
 pub trait RepoCreate {
