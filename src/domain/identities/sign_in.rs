@@ -32,6 +32,10 @@ pub async fn handler(
     let verify_result = password::verify(&identity.data.password_hash, &args.password)?;
 
     match verify_result {
+        false => Err(Error::BadRequest(ClientError::new(
+            "AUTHENTICATION_FAILED",
+            "Wrong email or password.",
+        ))),
         true => {
             let encoded_jwt = jwt.encode(
                 &identity.stream_id,
@@ -40,10 +44,6 @@ pub async fn handler(
             )?;
             Ok(Response { jwt: encoded_jwt })
         }
-        false => Err(Error::BadRequest(ClientError::new(
-            "AUTHENTICATION_FAILED",
-            "Wrong email or password.",
-        ))),
     }
 }
 
@@ -64,12 +64,11 @@ pub async fn controller(
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::domain::identities::repo::RepoMock;
 
     #[actix_rt::test]
     async fn not_found() {
-        use super::*;
-
         let mut repo = RepoMock::new();
         let jwt = Jwt::from_secret("secret");
 
@@ -89,6 +88,34 @@ mod tests {
             Error::BadRequest(ClientError::new(
                 "NOT_FOUND",
                 "Could not find an identity with email email@example.com"
+            ))
+        )
+    }
+
+    #[actix_rt::test]
+    async fn authentication_failed() {
+        let mut repo = RepoMock::new();
+
+        let jwt = Jwt::from_secret("supersecret");
+
+        let result = handler(
+            &mut repo,
+            jwt,
+            Args {
+                email: "existing_user@example.com".into(),
+                password: "failedpassword".into(),
+            },
+        )
+        .await
+        .unwrap_err();
+
+        assert_eq!(repo.result(), &vec!["email: existing_user@example.com"]);
+
+        assert_eq!(
+            result,
+            Error::BadRequest(ClientError::new(
+                "AUTHENTICATION_FAILED",
+                "Wrong email or password."
             ))
         )
     }
