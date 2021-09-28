@@ -102,4 +102,27 @@ impl Repo {
         .await?
         .ok_or(Error::InternalServerError)
     }
+
+    pub async fn find_by_email(&self, email: &str) -> Result<Option<Event<CreatedData>>> {
+        Ok(sqlx::query_as!(
+            FindByEmailResult,
+            r#"select
+            stream_id,
+            sequence_num,
+            version,
+            event_type,
+            cid,
+            inserted_at,
+            data as "data: Json<CreatedData>"
+            from identities.events
+            where
+            data->>'email' = $1
+            order by sequence_num asc"#,
+            email
+        )
+        .fetch_optional(&self.db)
+        .await?)
+    }
 }
+
+type FindByEmailResult = Event<CreatedData>;

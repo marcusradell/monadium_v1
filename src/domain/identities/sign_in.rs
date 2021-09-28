@@ -1,12 +1,9 @@
-use crate::io::event_store::types::Event;
+use super::repo::Repo;
 use crate::io::jwt::Jwt;
 use crate::io::password;
 use crate::io::result::{ClientError, Error};
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
-
-use super::CreatedData;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Args {
@@ -19,19 +16,13 @@ pub struct Response {
     pub jwt: String,
 }
 
-pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<Response, Error> {
-    let events = sqlx::query_as::<_, Event<CreatedData>>(
-        "select * from identities.events where data->>'email' = $1 order by sequence_num asc",
-    )
-    .bind(args.email.clone())
-    .fetch_all(&db)
-    .await?;
-    let identity = events
-        .iter()
-        .find(|&event| event.data.email == args.email)
+pub async fn handler(repo: &mut Repo, jwt: Jwt, args: Args) -> Result<Response, Error> {
+    let identity = repo
+        .find_by_email(&args.email)
+        .await?
         .ok_or(Error::BadRequest(ClientError::new(
-            "AUTHENTICATION_FAILED",
-            "Wrong email or password.",
+            "NOT_FOUND",
+            &format!("Could not find an identity with email {}", args.email),
         )))?;
 
     let verify_result = password::verify(&identity.data.password_hash, &args.password)?;
@@ -53,12 +44,12 @@ pub async fn handler(db: PgPool, jwt: Jwt, args: Args) -> Result<Response, Error
 }
 
 pub async fn controller(
-    web_db: web::Data<PgPool>,
+    web_repo: web::Data<Repo>,
     web_jwt: web::Data<Jwt>,
     web_args: web::Json<Args>,
 ) -> Result<HttpResponse, Error> {
     let result = handler(
-        web_db.get_ref().clone(),
+        &mut web_repo.get_ref().clone(),
         web_jwt.get_ref().clone(),
         web_args.into_inner(),
     )

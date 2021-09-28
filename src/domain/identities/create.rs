@@ -19,7 +19,6 @@ pub struct Args {
 pub async fn handler(
     args: Args,
     role: String,
-    db: PgPool,
     jwt: Jwt,
     repo: &mut Repo,
 ) -> Result<sign_in::Response, Error> {
@@ -29,7 +28,7 @@ pub async fn handler(
         // Email found, try signing them in instead of creating a new identity.
         Some(_) => {
             return sign_in::handler(
-                db,
+                repo,
                 jwt,
                 sign_in::Args {
                     email: args.email.clone(),
@@ -59,7 +58,6 @@ pub async fn handler(
 
 pub async fn controller(
     args: web::Json<Args>,
-    db: web::Data<PgPool>,
     jwt: web::Data<Jwt>,
     repo: web::Data<Repo>,
 ) -> Result<HttpResponse, Error> {
@@ -80,7 +78,6 @@ pub async fn controller(
     let result = handler(
         args,
         role.into(),
-        db.get_ref().clone(),
         jwt.get_ref().clone(),
         &mut repo.get_ref().clone(),
     )
