@@ -1,4 +1,4 @@
-use super::repo::{Repo, RepoFindByEmail};
+use super::repo::{types::RepoFindByEmail, Repo};
 use crate::io::jwt::Jwt;
 use crate::io::password;
 use crate::io::result::{ClientError, Error};
@@ -64,8 +64,8 @@ pub async fn controller(
 
 #[cfg(test)]
 mod tests {
+    use super::super::repo::mock::RepoMock;
     use super::*;
-    use crate::domain::identities::repo::RepoMock;
 
     #[actix_rt::test]
     async fn not_found() {

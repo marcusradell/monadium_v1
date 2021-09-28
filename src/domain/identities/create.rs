@@ -1,5 +1,5 @@
 use super::{
-    repo::{Repo, RepoCreate},
+    repo::{types::RepoCreate, Repo},
     sign_in,
     types::CreatedData,
 };

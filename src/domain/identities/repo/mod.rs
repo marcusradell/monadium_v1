@@ -1,78 +1,15 @@
+pub mod mock;
+pub mod types;
+
+use super::types::{CreatedData, CreatedEvent, EVENT_TYPE};
 use crate::io::{
     event_store::types::Event,
-    password,
     result::{Error, Result},
 };
 use async_trait::async_trait;
 use sqlx::{types::Json, PgPool};
+use types::{RepoCreate, RepoFindByEmail};
 use uuid::Uuid;
-
-use super::types::{CreatedData, CreatedEvent, EVENT_TYPE};
-
-#[async_trait]
-pub trait RepoCreate {
-    // TODO: Do I need to make self &mut when the real implementation only needs &self?
-    async fn create(&mut self, id: Uuid, data: CreatedData, cid: Uuid) -> Result<()>;
-}
-
-#[async_trait]
-pub trait RepoFindByEmail {
-    async fn find_by_email(&mut self, email: &str) -> Result<Option<Event<CreatedData>>>;
-}
-
-pub struct RepoMock {
-    result: Vec<String>,
-    data: Vec<Event<CreatedData>>,
-}
-
-impl RepoMock {
-    pub fn new() -> Self {
-        RepoMock {
-            result: vec![],
-            data: vec![CreatedEvent {
-                stream_id: Uuid::from_u128(1),
-                sequence_num: 1,
-                version: 1,
-                cid: Uuid::from_u128(2),
-                event_type: "IDENTITY/CREATED".into(),
-                inserted_at: "2021-01-31T23:59:30Z".parse().unwrap(),
-                data: Json(CreatedData {
-                    email: "existing_user@example.com".into(),
-                    password_hash: password::hash("password_hash").unwrap().into(),
-                    role: "MEMBER".into(),
-                }),
-            }],
-        }
-    }
-
-    pub fn result(&self) -> &Vec<String> {
-        &self.result
-    }
-}
-
-#[async_trait]
-impl RepoCreate for RepoMock {
-    async fn create(&mut self, id: Uuid, data: CreatedData, cid: Uuid) -> Result<()> {
-        self.result
-            .push(format!("id: {:?}, data: {:?}, cid: {:?}", id, data, cid));
-
-        Ok(())
-    }
-}
-
-#[async_trait]
-impl RepoFindByEmail for RepoMock {
-    async fn find_by_email(&mut self, email: &str) -> Result<Option<Event<CreatedData>>> {
-        self.result.push(format!("email: {}", email));
-
-        if email == self.data[0].data.email {
-            Ok(Some(self.data[0].clone()))
-        } else {
-            Ok(None)
-        }
-    }
-}
-
 #[derive(Clone)]
 pub struct Repo {
     db: PgPool,
