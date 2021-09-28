@@ -81,10 +81,11 @@ mod tests {
                 password: "password".into(),
             },
         )
-        .await;
+        .await
+        .unwrap_err();
 
         assert_eq!(
-            result.unwrap_err(),
+            result,
             Error::BadRequest(ClientError::new(
                 "NOT_FOUND",
                 "Could not find an identity with email email@example.com"
