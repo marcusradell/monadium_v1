@@ -33,6 +33,7 @@ pub async fn handler(
 
     let verify_result = password::verify(&identity.data.password_hash, &args.password)?;
 
+    // TODO: handle false result inside verify.
     match verify_result {
         false => Err(Error::BadRequest(ClientError::new(
             "AUTHENTICATION_FAILED",

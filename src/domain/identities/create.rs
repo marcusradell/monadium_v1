@@ -19,10 +19,17 @@ pub struct Args {
 
 pub async fn handler(
     args: Args,
-    role: String,
+    owner_email: String,
+    owner_password: String,
     jwt: Jwt,
     repo: &mut Repo,
 ) -> Result<sign_in::Response, Error> {
+    let role = if owner_email == args.email && owner_password == args.password {
+        "OWNER"
+    } else {
+        "MEMBER"
+    };
+
     let exists = repo.exists_by_email(&args.email).await?;
 
     match exists {
@@ -44,7 +51,7 @@ pub async fn handler(
             let data = CreatedData {
                 email: args.email.clone(),
                 password_hash,
-                role: role.clone(),
+                role: role.to_string(),
             };
             let cid = Uuid::new_v4();
             let id = Uuid::new_v4();
@@ -71,15 +78,10 @@ pub async fn controller(
 
     let args = args.into_inner();
 
-    let role = if owner_email == args.email && owner_password == args.password {
-        "OWNER"
-    } else {
-        "MEMBER"
-    };
-
     let result = handler(
         args,
-        role.into(),
+        owner_email,
+        owner_password,
         jwt.get_ref().clone(),
         &mut repo.get_ref().clone(),
     )
