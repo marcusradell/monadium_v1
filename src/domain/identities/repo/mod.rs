@@ -69,18 +69,6 @@ impl Repo {
         Self { db: db.clone() }
     }
 
-    pub async fn exists_by_email(&self, email: &str) -> Result<Option<()>> {
-        let result = sqlx::query!(
-            r#"select * from identities.events where event_type = $1 and data->>'email' = $2 limit 1"#,
-            EVENT_TYPE,
-            email.clone()
-        )
-        .fetch_optional(&self.db)
-        .await?;
-
-        Ok(result.and(Some(())))
-    }
-
     pub async fn show(&self, id: &Uuid) -> Result<Event<CreatedData>> {
         sqlx::query_as!(
             CreatedEvent,
