@@ -1,5 +1,8 @@
 use super::{
-    repo::{types::RepoCreate, Repo},
+    repo::{
+        types::{RepoCreate, RepoFindByEmail},
+        Repo,
+    },
     sign_in,
     types::CreatedData,
 };
@@ -22,7 +25,7 @@ pub async fn handler(
     owner_email: String,
     owner_password: String,
     jwt: Jwt,
-    repo: &mut Repo,
+    repo: &mut (impl RepoCreate + RepoFindByEmail),
 ) -> Result<sign_in::Response, Error> {
     let role = if owner_email == args.email && owner_password == args.password {
         "OWNER"
@@ -30,7 +33,7 @@ pub async fn handler(
         "MEMBER"
     };
 
-    let exists = repo.exists_by_email(&args.email).await?;
+    let exists = repo.find_by_email(&args.email).await?;
 
     match exists {
         // Email found, try signing them in instead of creating a new identity.
@@ -87,4 +90,46 @@ pub async fn controller(
     )
     .await?;
     Ok(HttpResponse::Ok().json(result))
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{
+        domain::identities::repo::mock::RepoMock,
+        io::jwt::{Claims, Jwt},
+    };
+
+    use super::*;
+
+    #[actix_rt::test]
+    async fn sign_in_existing_member() {
+        let jwt = Jwt::from_secret("jwt_secret");
+        let mut repo = RepoMock::new();
+        let now = Utc::now().timestamp();
+
+        let handler_result = handler(
+            Args {
+                email: "existing_user@example.com".into(),
+                password: "password".into(),
+            },
+            "nomatch@example.com".into(),
+            "password".into(),
+            jwt.clone(),
+            &mut repo,
+        )
+        .await
+        .unwrap();
+
+        let result = jwt.decode(handler_result.jwt).unwrap();
+
+        assert_eq!(
+            result,
+            Claims {
+                email: "existing_user@example.com".into(),
+                id: Uuid::from_u128(1),
+                exp: now + 15 * 60,
+                role: "MEMBER".into()
+            }
+        )
+    }
 }
