@@ -22,10 +22,12 @@ pub struct Args {
 
 pub async fn handler(
     args: Args,
-    owner_email: String,
-    owner_password: String,
+    owner_email: &str,
+    owner_password: &str,
     jwt: Jwt,
     repo: &mut (impl RepoCreate + RepoFindByEmail),
+    now: i64,
+    id: Uuid,
 ) -> Result<sign_in::Response, Error> {
     let role = if owner_email == args.email && owner_password == args.password {
         "OWNER"
@@ -41,7 +43,7 @@ pub async fn handler(
             return sign_in::handler(
                 repo,
                 jwt,
-                Utc::now().timestamp(),
+                now,
                 sign_in::Args {
                     email: args.email.clone(),
                     password: args.password,
@@ -57,10 +59,9 @@ pub async fn handler(
                 role: role.to_string(),
             };
             let cid = Uuid::new_v4();
-            let id = Uuid::new_v4();
             repo.create(id, data, cid).await?;
             let result = sign_in::Response {
-                jwt: jwt.encode(&id, &role, &args.email, Utc::now().timestamp())?,
+                jwt: jwt.encode(&id, &role, &args.email, now)?,
             };
 
             Ok(result)
@@ -81,12 +82,18 @@ pub async fn controller(
 
     let args = args.into_inner();
 
+    let now = Utc::now().timestamp();
+
+    let id = Uuid::new_v4();
+
     let result = handler(
         args,
-        owner_email,
-        owner_password,
+        &owner_email,
+        &owner_password,
         jwt.get_ref().clone(),
         &mut repo.get_ref().clone(),
+        now,
+        id,
     )
     .await?;
     Ok(HttpResponse::Ok().json(result))
@@ -116,6 +123,8 @@ mod test {
             "password".into(),
             jwt.clone(),
             &mut repo,
+            now,
+            Uuid::from_u128(999999999),
         )
         .await
         .unwrap();
@@ -130,6 +139,39 @@ mod test {
                 exp: now + 15 * 60,
                 role: "MEMBER".into()
             }
+        )
+    }
+
+    #[actix_rt::test]
+    async fn create_member() {
+        let jwt = Jwt::from_secret("sake_is_better_than_whiskey");
+        let mut repo = RepoMock::new();
+        let now = Utc::now().timestamp();
+        let id = Uuid::from_u128(100);
+
+        let result = handler(
+            Args {
+                email: "created@example.com".into(),
+                password: "pass".into(),
+            },
+            "no_match_here@example.com",
+            "coffe_latte",
+            jwt.clone(),
+            &mut repo,
+            now,
+            id,
+        )
+        .await
+        .and_then(|response| jwt.decode(response.jwt));
+
+        assert_eq!(
+            result,
+            Ok(Claims {
+                email: "created@example.com".into(),
+                id,
+                exp: now + 15 * 60,
+                role: "MEMBER".into()
+            })
         )
     }
 }
