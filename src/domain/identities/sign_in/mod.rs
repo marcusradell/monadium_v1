@@ -1,6 +1,6 @@
 use super::repo::types::RepoFindByEmail;
 use crate::io::jwt::Jwt;
-use crate::io::password::types::PasswordVerifier;
+use crate::io::password::Verify;
 use crate::io::result::{ClientError, Error};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -21,7 +21,7 @@ pub struct Response {
 
 pub async fn handler(
     repo: &mut impl RepoFindByEmail,
-    password: impl PasswordVerifier,
+    verify: Verify,
     jwt: Jwt,
     now: DateTime<Utc>,
     args: Args,
@@ -34,7 +34,7 @@ pub async fn handler(
             &format!("Could not find an identity with email {}", args.email),
         )))?;
 
-    let verify_result = password.verify(&identity.data.password_hash, &args.password)?;
+    let verify_result = verify(&identity.data.password_hash, &args.password)?;
 
     // TODO: handle false result inside verify.
     match verify_result {

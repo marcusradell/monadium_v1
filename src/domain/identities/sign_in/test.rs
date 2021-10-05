@@ -1,8 +1,7 @@
 #![cfg(test)]
 
 use crate::domain::identities::sign_in::Args;
-use crate::io::password::mock::PasswordMock;
-use crate::io::password::types::PasswordHasher;
+use crate::io::password::mock::{hash, verify};
 use crate::io::result::{ClientError, Error};
 use crate::{domain::identities::sign_in::handler, io::jwt::Claims};
 use crate::{
@@ -23,7 +22,7 @@ async fn not_found() {
 
     let result = handler(
         &mut repo,
-        PasswordMock {},
+        verify,
         jwt,
         now,
         Args {
@@ -46,7 +45,6 @@ async fn not_found() {
 #[actix_rt::test]
 async fn authentication_failed() {
     let mut repo = RepoMock::new();
-    let password = PasswordMock {};
     let jwt = Jwt::from_secret("supersecret");
     let now = Utc::now();
 
@@ -55,7 +53,7 @@ async fn authentication_failed() {
         1,
         CreatedData {
             email: "existing_user_wrong_pass@example.com".into(),
-            password_hash: password.clone().hash("password123").unwrap(),
+            password_hash: hash("password123").unwrap(),
             role: "MEMBER".into(),
         },
         Uuid::from_u128(2),
@@ -64,7 +62,7 @@ async fn authentication_failed() {
 
     let result = handler(
         &mut repo,
-        password,
+        verify,
         jwt,
         now,
         Args {
@@ -87,7 +85,6 @@ async fn authentication_failed() {
 #[actix_rt::test]
 async fn signed_in() {
     let mut repo = RepoMock::new();
-    let password = PasswordMock {};
     let jwt = Jwt::from_secret("pillutadig");
     let now = Utc::now();
 
@@ -96,7 +93,7 @@ async fn signed_in() {
         1,
         CreatedData {
             email: "existing_user@example.com".into(),
-            password_hash: password.clone().hash("correct_password").unwrap(),
+            password_hash: hash("correct_password").unwrap(),
             role: "MEMBER".into(),
         },
         Uuid::from_u128(2),
@@ -105,7 +102,7 @@ async fn signed_in() {
 
     let response = handler(
         &mut repo,
-        password,
+        verify,
         jwt.clone(),
         now,
         Args {

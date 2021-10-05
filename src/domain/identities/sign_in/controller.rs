@@ -1,4 +1,4 @@
-use crate::io::password::Password;
+use crate::io::password::verify;
 use crate::io::result::Result;
 use crate::{
     domain::identities::{repo::Repo, sign_in::Args},
@@ -16,7 +16,7 @@ pub async fn controller(
 ) -> Result<HttpResponse> {
     let result = handler(
         &mut web_repo.get_ref().clone(),
-        Password {},
+        verify,
         web_jwt.get_ref().clone(),
         Utc::now(),
         web_args.into_inner(),

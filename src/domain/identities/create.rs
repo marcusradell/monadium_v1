@@ -6,9 +6,9 @@ use super::{
     sign_in,
     types::CreatedData,
 };
-use crate::io::password::{types::PasswordVerifier, Password};
+use crate::io::jwt::Jwt;
+use crate::io::password::{hash, verify, Hash, Verify};
 use crate::io::result::Error;
-use crate::io::{jwt::Jwt, password::types::PasswordHasher};
 use actix_web::{web, HttpResponse};
 use chrono::{DateTime, Utc};
 use serde::Deserialize;
@@ -25,7 +25,8 @@ pub async fn handler(
     owner_email: &str,
     owner_password: &str,
     cid: Uuid,
-    password: impl PasswordHasher + PasswordVerifier,
+    verify: Verify,
+    hash: Hash,
     jwt: Jwt,
     repo: &mut (impl RepoCreate + RepoFindByEmail),
     now: DateTime<Utc>,
@@ -44,7 +45,7 @@ pub async fn handler(
         Some(_) => {
             return sign_in::handler(
                 repo,
-                password,
+                verify,
                 jwt,
                 now,
                 sign_in::Args {
@@ -55,7 +56,7 @@ pub async fn handler(
             .await;
         }
         None => {
-            let password_hash = password.hash(&args.password)?;
+            let password_hash = hash(&args.password)?;
             let data = CreatedData {
                 email: args.email.clone(),
                 password_hash,
@@ -87,14 +88,13 @@ pub async fn controller(
     let id = Uuid::new_v4();
     let cid = Uuid::new_v4();
 
-    let password = Password {};
-
     let result = handler(
         args,
         &owner_email,
         &owner_password,
         cid,
-        password,
+        verify,
+        hash,
         jwt.get_ref().clone(),
         &mut repo.get_ref().clone(),
         now,
@@ -110,7 +110,7 @@ mod test {
         domain::identities::{repo::mock::RepoMock, types::CreatedEvent},
         io::{
             jwt::{Claims, Jwt},
-            password::{mock::PasswordMock, types::PasswordHasher},
+            password::mock::{hash, verify},
         },
     };
 
@@ -121,14 +121,13 @@ mod test {
         let jwt = Jwt::from_secret("jwt_secret");
         let mut repo = RepoMock::new();
         let now = Utc::now();
-        let password = PasswordMock {};
 
         repo.insert_fixture(CreatedEvent::new(
             Uuid::from_u128(1),
             1,
             CreatedData {
                 email: "existing_user@example.com".into(),
-                password_hash: password.clone().hash("correct_password").unwrap(),
+                password_hash: hash("correct_password").unwrap(),
                 role: "MEMBER".into(),
             },
             Uuid::from_u128(2),
@@ -143,7 +142,8 @@ mod test {
             "nomatch@example.com".into(),
             "password".into(),
             Uuid::from_u128(2),
-            password,
+            verify,
+            hash,
             jwt.clone(),
             &mut repo,
             now,
@@ -171,7 +171,6 @@ mod test {
         let mut repo = RepoMock::new();
         let now = Utc::now();
         let id = Uuid::from_u128(100);
-        let password = PasswordMock {};
 
         let result = handler(
             Args {
@@ -181,7 +180,8 @@ mod test {
             "no_match_here@example.com",
             "coffee_latte",
             Uuid::from_u128(2),
-            password,
+            verify,
+            hash,
             jwt.clone(),
             &mut repo,
             now,
@@ -207,7 +207,6 @@ mod test {
         let jwt = Jwt::from_secret("my_kids_will_never_get_to_play_hockey");
         let now = Utc::now();
         let id = Uuid::from_u128(100);
-        let password = PasswordMock {};
 
         let result = handler(
             Args {
@@ -217,7 +216,8 @@ mod test {
             "created_owner@example.com",
             "000",
             Uuid::from_u128(2),
-            password.clone(),
+            verify,
+            hash,
             jwt.clone(),
             &mut repo,
             now,
@@ -233,7 +233,7 @@ mod test {
                 1,
                 CreatedData {
                     email: "created_owner@example.com".into(),
-                    password_hash: password.hash("000").unwrap().into(),
+                    password_hash: hash("000").unwrap().into(),
                     role: "OWNER".into(),
                 },
                 Uuid::from_u128(2),
