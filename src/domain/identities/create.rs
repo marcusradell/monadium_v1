@@ -24,6 +24,7 @@ pub async fn handler(
     args: Args,
     owner_email: &str,
     owner_password: &str,
+    cid: Uuid,
     jwt: Jwt,
     repo: &mut (impl RepoCreate + RepoFindByEmail),
     now: i64,
@@ -58,7 +59,6 @@ pub async fn handler(
                 password_hash,
                 role: role.to_string(),
             };
-            let cid = Uuid::new_v4();
             repo.create(id, data, cid).await?;
             let result = sign_in::Response {
                 jwt: jwt.encode(&id, &role, &args.email, now)?,
@@ -81,15 +81,15 @@ pub async fn controller(
         std::env::var("IDENTITIES_OWNER_PASSWORD").expect("Missing IDENTITIES_OWNER_PASSWORD.");
 
     let args = args.into_inner();
-
     let now = Utc::now().timestamp();
-
     let id = Uuid::new_v4();
+    let cid = Uuid::new_v4();
 
     let result = handler(
         args,
         &owner_email,
         &owner_password,
+        cid,
         jwt.get_ref().clone(),
         &mut repo.get_ref().clone(),
         now,
@@ -102,7 +102,7 @@ pub async fn controller(
 #[cfg(test)]
 mod test {
     use crate::{
-        domain::identities::repo::mock::RepoMock,
+        domain::identities::{repo::mock::RepoMock, types::CreatedEvent},
         io::jwt::{Claims, Jwt},
     };
 
@@ -121,6 +121,7 @@ mod test {
             },
             "nomatch@example.com".into(),
             "password".into(),
+            Uuid::from_u128(2),
             jwt.clone(),
             &mut repo,
             now,
@@ -155,7 +156,8 @@ mod test {
                 password: "pass".into(),
             },
             "no_match_here@example.com",
-            "coffe_latte",
+            "coffee_latte",
+            Uuid::from_u128(2),
             jwt.clone(),
             &mut repo,
             now,
@@ -189,6 +191,7 @@ mod test {
             },
             "created_owner@example.com",
             "000",
+            Uuid::from_u128(2),
             jwt.clone(),
             &mut repo,
             now,
@@ -196,6 +199,20 @@ mod test {
         )
         .await
         .and_then(|response| jwt.decode(response.jwt));
+
+        assert_eq!(
+            repo.data(),
+            &vec![CreatedEvent::new(
+                Uuid::from_u128(100),
+                1,
+                CreatedData {
+                    email: "created_owner@example.com".into(),
+                    password_hash: password::hash_mock("000").unwrap().into(),
+                    role: "MEMBER".into(),
+                },
+                Uuid::from_u128(2),
+            )]
+        );
 
         assert_eq!(
             result,

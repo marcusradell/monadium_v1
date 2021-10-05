@@ -69,13 +69,12 @@ pub async fn controller(
 
 #[cfg(test)]
 mod tests {
-    use chrono::Utc;
-    use uuid::Uuid;
-
-    use crate::io::jwt::Claims;
-
     use super::super::repo::mock::RepoMock;
     use super::*;
+    use crate::domain::identities::types::{CreatedData, CreatedEvent};
+    use crate::io::jwt::Claims;
+    use chrono::Utc;
+    use uuid::Uuid;
 
     #[actix_rt::test]
     async fn not_found() {
@@ -110,19 +109,28 @@ mod tests {
         let jwt = Jwt::from_secret("supersecret");
         let now = Utc::now().timestamp();
 
+        repo.insert_fixture(CreatedEvent::new(
+            Uuid::from_u128(1),
+            1,
+            CreatedData {
+                email: "existing_user_wrong_pass@example.com".into(),
+                password_hash: password::hash_mock("password123").unwrap(),
+                role: "MEMBER".into(),
+            },
+            Uuid::from_u128(2),
+        ));
+
         let result = handler(
             &mut repo,
             jwt,
             now,
             Args {
-                email: "existing_user@example.com".into(),
+                email: "existing_user_wrong_pass@example.com".into(),
                 password: "failedpassword".into(),
             },
         )
         .await
         .unwrap_err();
-
-        assert_eq!(repo.result(), &vec!["email: existing_user@example.com"]);
 
         assert_eq!(
             result,
@@ -139,6 +147,17 @@ mod tests {
         let jwt = Jwt::from_secret("pillutadig");
         let now = Utc::now().timestamp();
 
+        repo.insert_fixture(CreatedEvent::new(
+            Uuid::from_u128(1),
+            1,
+            CreatedData {
+                email: "existing_user@example.com".into(),
+                password_hash: password::hash_mock("password").unwrap(),
+                role: "MEMBER".into(),
+            },
+            Uuid::from_u128(2),
+        ));
+
         let response = handler(
             &mut repo,
             jwt.clone(),
@@ -152,8 +171,6 @@ mod tests {
         .unwrap();
 
         let result = jwt.decode(response.jwt).unwrap();
-
-        assert_eq!(repo.result(), &vec!["email: existing_user@example.com"]);
 
         assert_eq!(
             result,
