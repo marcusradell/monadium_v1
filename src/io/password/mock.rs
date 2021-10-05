@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::io::result::Result;
 
 pub fn hash(_: &str) -> Result<String> {
