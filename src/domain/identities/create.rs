@@ -6,11 +6,11 @@ use super::{
     sign_in,
     types::CreatedData,
 };
-use crate::io::jwt::Jwt;
-use crate::io::password;
+use crate::io::password::{types::PasswordVerifier, Password};
 use crate::io::result::Error;
+use crate::io::{jwt::Jwt, password::types::PasswordHasher};
 use actix_web::{web, HttpResponse};
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -25,9 +25,10 @@ pub async fn handler(
     owner_email: &str,
     owner_password: &str,
     cid: Uuid,
+    password: impl PasswordHasher + PasswordVerifier,
     jwt: Jwt,
     repo: &mut (impl RepoCreate + RepoFindByEmail),
-    now: i64,
+    now: DateTime<Utc>,
     id: Uuid,
 ) -> Result<sign_in::Response, Error> {
     let role = if owner_email == args.email && owner_password == args.password {
@@ -43,6 +44,7 @@ pub async fn handler(
         Some(_) => {
             return sign_in::handler(
                 repo,
+                password,
                 jwt,
                 now,
                 sign_in::Args {
@@ -53,15 +55,15 @@ pub async fn handler(
             .await;
         }
         None => {
-            let password_hash = password::hash(&args.password)?;
+            let password_hash = password.hash(&args.password)?;
             let data = CreatedData {
                 email: args.email.clone(),
                 password_hash,
                 role: role.to_string(),
             };
-            repo.create(id, data, cid).await?;
+            repo.create(id, data, cid, now).await?;
             let result = sign_in::Response {
-                jwt: jwt.encode(&id, &role, &args.email, now)?,
+                jwt: jwt.encode(&id, &role, &args.email, now.timestamp())?,
             };
 
             Ok(result)
@@ -81,15 +83,18 @@ pub async fn controller(
         std::env::var("IDENTITIES_OWNER_PASSWORD").expect("Missing IDENTITIES_OWNER_PASSWORD.");
 
     let args = args.into_inner();
-    let now = Utc::now().timestamp();
+    let now = Utc::now();
     let id = Uuid::new_v4();
     let cid = Uuid::new_v4();
+
+    let password = Password {};
 
     let result = handler(
         args,
         &owner_email,
         &owner_password,
         cid,
+        password,
         jwt.get_ref().clone(),
         &mut repo.get_ref().clone(),
         now,
@@ -103,7 +108,10 @@ pub async fn controller(
 mod test {
     use crate::{
         domain::identities::{repo::mock::RepoMock, types::CreatedEvent},
-        io::jwt::{Claims, Jwt},
+        io::{
+            jwt::{Claims, Jwt},
+            password::{mock::PasswordMock, types::PasswordHasher},
+        },
     };
 
     use super::*;
@@ -112,16 +120,30 @@ mod test {
     async fn sign_in_existing_member() {
         let jwt = Jwt::from_secret("jwt_secret");
         let mut repo = RepoMock::new();
-        let now = Utc::now().timestamp();
+        let now = Utc::now();
+        let password = PasswordMock {};
+
+        repo.insert_fixture(CreatedEvent::new(
+            Uuid::from_u128(1),
+            1,
+            CreatedData {
+                email: "existing_user@example.com".into(),
+                password_hash: password.clone().hash("correct_password").unwrap(),
+                role: "MEMBER".into(),
+            },
+            Uuid::from_u128(2),
+            Utc::now(),
+        ));
 
         let handler_result = handler(
             Args {
                 email: "existing_user@example.com".into(),
-                password: "password".into(),
+                password: "correct_password".into(),
             },
             "nomatch@example.com".into(),
             "password".into(),
             Uuid::from_u128(2),
+            password,
             jwt.clone(),
             &mut repo,
             now,
@@ -137,7 +159,7 @@ mod test {
             Claims {
                 email: "existing_user@example.com".into(),
                 id: Uuid::from_u128(1),
-                exp: now + 15 * 60,
+                exp: now.timestamp() + 15 * 60,
                 role: "MEMBER".into()
             }
         )
@@ -147,8 +169,9 @@ mod test {
     async fn create_member() {
         let jwt = Jwt::from_secret("sake_is_better_than_whiskey");
         let mut repo = RepoMock::new();
-        let now = Utc::now().timestamp();
+        let now = Utc::now();
         let id = Uuid::from_u128(100);
+        let password = PasswordMock {};
 
         let result = handler(
             Args {
@@ -158,6 +181,7 @@ mod test {
             "no_match_here@example.com",
             "coffee_latte",
             Uuid::from_u128(2),
+            password,
             jwt.clone(),
             &mut repo,
             now,
@@ -171,7 +195,7 @@ mod test {
             Ok(Claims {
                 email: "created@example.com".into(),
                 id,
-                exp: now + 15 * 60,
+                exp: now.timestamp() + 15 * 60,
                 role: "MEMBER".into()
             })
         )
@@ -179,10 +203,11 @@ mod test {
 
     #[actix_rt::test]
     async fn create_owner() {
-        let jwt = Jwt::from_secret("my_kids_will_never_get_to_play_hockey");
         let mut repo = RepoMock::new();
-        let now = Utc::now().timestamp();
+        let jwt = Jwt::from_secret("my_kids_will_never_get_to_play_hockey");
+        let now = Utc::now();
         let id = Uuid::from_u128(100);
+        let password = PasswordMock {};
 
         let result = handler(
             Args {
@@ -192,6 +217,7 @@ mod test {
             "created_owner@example.com",
             "000",
             Uuid::from_u128(2),
+            password.clone(),
             jwt.clone(),
             &mut repo,
             now,
@@ -207,10 +233,11 @@ mod test {
                 1,
                 CreatedData {
                     email: "created_owner@example.com".into(),
-                    password_hash: password::hash_mock("000").unwrap().into(),
-                    role: "MEMBER".into(),
+                    password_hash: password.hash("000").unwrap().into(),
+                    role: "OWNER".into(),
                 },
                 Uuid::from_u128(2),
+                now
             )]
         );
 
@@ -219,7 +246,7 @@ mod test {
             Ok(Claims {
                 email: "created_owner@example.com".into(),
                 id,
-                exp: now + 15 * 60,
+                exp: now.timestamp() + 15 * 60,
                 role: "OWNER".into()
             })
         )

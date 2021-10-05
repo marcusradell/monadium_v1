@@ -6,6 +6,7 @@ use super::{
 };
 use crate::io::result::Result;
 use async_trait::async_trait;
+use chrono::{DateTime, Utc};
 use std::convert::TryInto;
 use uuid::Uuid;
 
@@ -29,12 +30,19 @@ impl RepoMock {
 
 #[async_trait]
 impl RepoCreate for RepoMock {
-    async fn create(&mut self, id: Uuid, data: CreatedData, cid: Uuid) -> Result<()> {
+    async fn create(
+        &mut self,
+        id: Uuid,
+        data: CreatedData,
+        cid: Uuid,
+        inserted_at: DateTime<Utc>,
+    ) -> Result<()> {
         self.data.push(CreatedEvent::new(
             id,
             (self.data.len() + 1).try_into().unwrap(),
             data,
             cid,
+            inserted_at,
         ));
 
         Ok(())

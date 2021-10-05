@@ -7,6 +7,7 @@ use crate::io::{
     result::{Error, Result},
 };
 use async_trait::async_trait;
+use chrono::{DateTime, Utc};
 use sqlx::{types::Json, PgPool};
 use types::{RepoCreate, RepoFindByEmail};
 use uuid::Uuid;
@@ -17,21 +18,28 @@ pub struct Repo {
 
 #[async_trait]
 impl RepoCreate for Repo {
-    async fn create(&mut self, id: Uuid, data: CreatedData, cid: Uuid) -> Result<()> {
+    async fn create(
+        &mut self,
+        id: Uuid,
+        data: CreatedData,
+        cid: Uuid,
+        inserted_at: DateTime<Utc>,
+    ) -> Result<()> {
         let data = Json(data);
 
         sqlx::query!(
             r#"
     insert into identities.events
-    (stream_id, version, event_type, data, cid) VALUES
-    ( $1, $2, $3, $4, $5 )
+    (stream_id, version, event_type, data, cid, inserted_at) VALUES
+    ( $1, $2, $3, $4, $5, $6 )
     returning sequence_num
             "#,
             id,
             1,
             EVENT_TYPE,
             data as _,
-            cid
+            cid,
+            inserted_at
         )
         .fetch_one(&self.db)
         .await?;

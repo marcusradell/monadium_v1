@@ -1,4 +1,4 @@
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::types::Json;
 use uuid::Uuid;
@@ -16,7 +16,13 @@ pub struct CreatedData {
 pub type CreatedEvent = Event<CreatedData>;
 
 impl CreatedEvent {
-    pub fn new(stream_id: Uuid, sequence_num: i64, data: CreatedData, cid: Uuid) -> Self {
+    pub fn new(
+        stream_id: Uuid,
+        sequence_num: i64,
+        data: CreatedData,
+        cid: Uuid,
+        inserted_at: DateTime<Utc>,
+    ) -> Self {
         CreatedEvent {
             stream_id,
             version: 1,
@@ -24,7 +30,7 @@ impl CreatedEvent {
             sequence_num,
             data: Json(data),
             cid,
-            inserted_at: Utc::now(),
+            inserted_at,
         }
     }
 }

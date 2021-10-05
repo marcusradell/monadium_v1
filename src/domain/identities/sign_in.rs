@@ -1,9 +1,10 @@
 use super::repo::{types::RepoFindByEmail, Repo};
 use crate::io::jwt::Jwt;
-use crate::io::password;
+use crate::io::password::types::PasswordVerifier;
+use crate::io::password::Password;
 use crate::io::result::{ClientError, Error};
 use actix_web::{web, HttpResponse};
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -19,8 +20,9 @@ pub struct Response {
 
 pub async fn handler(
     repo: &mut impl RepoFindByEmail,
+    password: impl PasswordVerifier,
     jwt: Jwt,
-    now: i64,
+    now: DateTime<Utc>,
     args: Args,
 ) -> Result<Response, Error> {
     let identity = repo
@@ -31,7 +33,7 @@ pub async fn handler(
             &format!("Could not find an identity with email {}", args.email),
         )))?;
 
-    let verify_result = password::verify(&identity.data.password_hash, &args.password)?;
+    let verify_result = password.verify(&identity.data.password_hash, &args.password)?;
 
     // TODO: handle false result inside verify.
     match verify_result {
@@ -44,7 +46,7 @@ pub async fn handler(
                 &identity.stream_id,
                 &identity.data.role,
                 &args.email.clone(),
-                now,
+                now.timestamp(),
             )?;
             Ok(Response { jwt: encoded_jwt })
         }
@@ -58,8 +60,9 @@ pub async fn controller(
 ) -> Result<HttpResponse, Error> {
     let result = handler(
         &mut web_repo.get_ref().clone(),
+        Password {},
         web_jwt.get_ref().clone(),
-        Utc::now().timestamp(),
+        Utc::now(),
         web_args.into_inner(),
     )
     .await?;
@@ -73,6 +76,8 @@ mod tests {
     use super::*;
     use crate::domain::identities::types::{CreatedData, CreatedEvent};
     use crate::io::jwt::Claims;
+    use crate::io::password::mock::PasswordMock;
+    use crate::io::password::types::PasswordHasher;
     use chrono::Utc;
     use uuid::Uuid;
 
@@ -80,10 +85,11 @@ mod tests {
     async fn not_found() {
         let mut repo = RepoMock::new();
         let jwt = Jwt::from_secret("secret");
-        let now = Utc::now().timestamp();
+        let now = Utc::now();
 
         let result = handler(
             &mut repo,
+            PasswordMock {},
             jwt,
             now,
             Args {
@@ -106,22 +112,25 @@ mod tests {
     #[actix_rt::test]
     async fn authentication_failed() {
         let mut repo = RepoMock::new();
+        let password = PasswordMock {};
         let jwt = Jwt::from_secret("supersecret");
-        let now = Utc::now().timestamp();
+        let now = Utc::now();
 
         repo.insert_fixture(CreatedEvent::new(
             Uuid::from_u128(1),
             1,
             CreatedData {
                 email: "existing_user_wrong_pass@example.com".into(),
-                password_hash: password::hash_mock("password123").unwrap(),
+                password_hash: password.clone().hash("password123").unwrap(),
                 role: "MEMBER".into(),
             },
             Uuid::from_u128(2),
+            now,
         ));
 
         let result = handler(
             &mut repo,
+            password,
             jwt,
             now,
             Args {
@@ -144,27 +153,30 @@ mod tests {
     #[actix_rt::test]
     async fn signed_in() {
         let mut repo = RepoMock::new();
+        let password = PasswordMock {};
         let jwt = Jwt::from_secret("pillutadig");
-        let now = Utc::now().timestamp();
+        let now = Utc::now();
 
         repo.insert_fixture(CreatedEvent::new(
             Uuid::from_u128(1),
             1,
             CreatedData {
                 email: "existing_user@example.com".into(),
-                password_hash: password::hash_mock("password").unwrap(),
+                password_hash: password.clone().hash("correct_password").unwrap(),
                 role: "MEMBER".into(),
             },
             Uuid::from_u128(2),
+            now,
         ));
 
         let response = handler(
             &mut repo,
+            password,
             jwt.clone(),
             now,
             Args {
                 email: "existing_user@example.com".into(),
-                password: "password".into(),
+                password: "correct_password".into(),
             },
         )
         .await
@@ -178,7 +190,7 @@ mod tests {
                 id: Uuid::from_u128(1),
                 role: "MEMBER".into(),
                 email: "existing_user@example.com".into(),
-                exp: now + 15 * 60
+                exp: now.timestamp() + 15 * 60
             }
         );
     }
