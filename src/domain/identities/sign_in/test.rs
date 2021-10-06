@@ -41,11 +41,7 @@ async fn authentication_failed() {
     repo.insert_fixture(CreatedEvent::new(
         Uuid::from_u128(1),
         1,
-        CreatedData {
-            email: "existing_user_wrong_pass@example.com".into(),
-            password_hash: hash("password123").unwrap(),
-            role: "MEMBER".into(),
-        },
+        CreatedData::mock_member(),
         Uuid::from_u128(2),
         now,
     ));
@@ -55,7 +51,7 @@ async fn authentication_failed() {
         verify,
         jwt,
         now,
-        "existing_user_wrong_pass@example.com",
+        "existing_member@example.com",
         "failedpassword",
     )
     .await
@@ -76,11 +72,7 @@ async fn signed_in() {
     repo.insert_fixture(CreatedEvent::new(
         Uuid::from_u128(1),
         1,
-        CreatedData {
-            email: "existing_user@example.com".into(),
-            password_hash: hash("correct_password").unwrap(),
-            role: "MEMBER".into(),
-        },
+        CreatedData::mock_member(),
         Uuid::from_u128(2),
         now,
     ));
@@ -90,7 +82,7 @@ async fn signed_in() {
         verify,
         jwt.clone(),
         now,
-        "existing_user@example.com",
+        "existing_member@example.com",
         "correct_password",
     )
     .await
@@ -103,7 +95,7 @@ async fn signed_in() {
         Claims {
             id: Uuid::from_u128(1),
             role: "MEMBER".into(),
-            email: "existing_user@example.com".into(),
+            email: "existing_member@example.com".into(),
             exp: now.timestamp() + 15 * 60
         }
     );
