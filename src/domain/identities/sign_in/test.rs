@@ -19,17 +19,16 @@ async fn not_found() {
     let mut repo = RepoMock::new();
     let jwt = Jwt::from_secret("secret");
     let now = Utc::now();
+    let email = "email@example.com";
+    let password = "password";
 
-    let result = handler(&mut repo, verify, jwt, now, "email@example.com", "password")
+    let result = handler(&mut repo, verify, jwt, now, email, password)
         .await
         .unwrap_err();
 
     assert_eq!(
         result,
-        Error::BadRequest(ClientError::new(
-            "NOT_FOUND",
-            "Could not find an identity with email email@example.com"
-        ))
+        Error::BadRequest(ClientError::not_found("email@example.com"))
     )
 }
 
@@ -62,13 +61,7 @@ async fn authentication_failed() {
     .await
     .unwrap_err();
 
-    assert_eq!(
-        result,
-        Error::BadRequest(ClientError::new(
-            "AUTHENTICATION_FAILED",
-            "Wrong email or password."
-        ))
-    )
+    assert_eq!(result, Error::BadRequest(ClientError::auth_failed()))
 }
 
 #[actix_rt::test]

@@ -30,19 +30,13 @@ pub async fn handler(
     let identity = repo
         .find_by_email(email)
         .await?
-        .ok_or(Error::BadRequest(ClientError::new(
-            "NOT_FOUND",
-            &format!("Could not find an identity with email {}", email),
-        )))?;
+        .ok_or(Error::BadRequest(ClientError::not_found(email)))?;
 
     let verify_result = verify(&identity.data.password_hash, password)?;
 
     // TODO: handle false result inside verify.
     match verify_result {
-        false => Err(Error::BadRequest(ClientError::new(
-            "AUTHENTICATION_FAILED",
-            "Wrong email or password.",
-        ))),
+        false => Err(Error::BadRequest(ClientError::auth_failed())),
         true => {
             let encoded_jwt = jwt.encode(
                 &identity.stream_id,

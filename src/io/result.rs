@@ -11,17 +11,54 @@ pub enum Error {
 }
 
 #[derive(Debug, Display, Serialize, PartialEq)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum ErrorCode {
+    NotFound,
+    InternalError,
+    AuthFailed,
+    AuthTokenExpired,
+}
+
+#[derive(Debug, Display, Serialize, PartialEq)]
 #[display(fmt = "[{}]:{}", code, message)]
 pub struct ClientError {
     message: String,
-    code: String,
+    code: ErrorCode,
 }
 
 impl ClientError {
-    pub fn new(code: &str, message: &str) -> Self {
+    pub fn new(code: ErrorCode, message: &str) -> Self {
         Self {
-            code: code.into(),
+            code: code,
             message: message.into(),
+        }
+    }
+
+    pub fn not_found(id: &str) -> Self {
+        Self {
+            code: ErrorCode::NotFound,
+            message: format!("Could not find {}.", id),
+        }
+    }
+
+    pub fn auth_failed() -> Self {
+        Self {
+            code: ErrorCode::AuthFailed,
+            message: "Wrong email or password.".into(),
+        }
+    }
+
+    pub fn auth_token_expired() -> Self {
+        Self {
+            code: ErrorCode::AuthTokenExpired,
+            message: "Your JWT has expired. Please sign in again to receive and new one.".into(),
+        }
+    }
+
+    pub fn internal_error() -> Self {
+        Self {
+            code: ErrorCode::InternalError,
+            message: "Thoughts and prayers.".into(),
         }
     }
 }
@@ -29,10 +66,9 @@ impl ClientError {
 impl ResponseError for Error {
     fn error_response(&self) -> HttpResponse {
         match self {
-            Error::InternalServerError => HttpResponse::InternalServerError().json(ClientError {
-                code: "INTERNAL_ERROR".into(),
-                message: "Thoughts and prayers.".into(),
-            }),
+            Error::InternalServerError => {
+                HttpResponse::InternalServerError().json(ClientError::internal_error())
+            }
             Error::BadRequest(client_error) => HttpResponse::BadRequest().json(client_error),
         }
     }
