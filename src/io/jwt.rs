@@ -69,14 +69,10 @@ impl Jwt {
 impl From<jsonwebtoken::errors::Error> for Error {
     fn from(error: jsonwebtoken::errors::Error) -> Error {
         match *error.kind() {
-            jwt_errors::ErrorKind::ExpiredSignature => Error::BadRequest(ClientError::new(
-                "IO/JWT/EXPIRED",
-                "Your JWT has expired. Please sign in again to receive and new one.",
-            )),
-            _ => Error::BadRequest(ClientError::new(
-                "IO/JWT/EXCEPTION",
-                "Something went wrong with the JWT. Please contact us for further assistance.",
-            )),
+            jwt_errors::ErrorKind::ExpiredSignature => {
+                Error::BadRequest(ClientError::auth_token_expired())
+            }
+            _ => Error::BadRequest(ClientError::internal_error()),
         }
     }
 }
