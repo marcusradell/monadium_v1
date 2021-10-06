@@ -1,8 +1,9 @@
 #![cfg(test)]
 
+use super::handler;
+use crate::io::jwt::Claims;
 use crate::io::password::mock::{hash, verify};
 use crate::io::result::{ClientError, Error};
-use crate::{domain::identities::sign_in::handler, io::jwt::Claims};
 use crate::{
     domain::identities::{
         repo::mock::RepoMock,
