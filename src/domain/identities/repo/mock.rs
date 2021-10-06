@@ -19,8 +19,16 @@ impl RepoMock {
         RepoMock { data: vec![] }
     }
 
-    pub fn insert_fixture(&mut self, event: CreatedEvent) {
-        self.data.push(event);
+    pub fn member_created(&mut self) -> CreatedEvent {
+        let event = CreatedEvent::new(
+            Uuid::from_u128(1),
+            1,
+            CreatedData::mock_member(),
+            Uuid::from_u128(2),
+            Utc::now(),
+        );
+        self.data.push(event.clone());
+        event
     }
 
     pub fn data(&self) -> &Vec<CreatedEvent> {

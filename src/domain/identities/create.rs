@@ -112,21 +112,11 @@ mod test {
         let mut repo = RepoMock::new();
         let now = Utc::now();
 
-        repo.insert_fixture(CreatedEvent::new(
-            Uuid::from_u128(1),
-            1,
-            CreatedData {
-                email: "existing_user@example.com".into(),
-                password_hash: hash("correct_password").unwrap(),
-                role: "MEMBER".into(),
-            },
-            Uuid::from_u128(2),
-            Utc::now(),
-        ));
+        let member_created = repo.member_created();
 
         let handler_result = handler(
             Args {
-                email: "existing_user@example.com".into(),
+                email: member_created.data.email.clone(),
                 password: "correct_password".into(),
             },
             "nomatch@example.com".into(),
@@ -147,7 +137,7 @@ mod test {
         assert_eq!(
             result,
             Claims {
-                email: "existing_user@example.com".into(),
+                email: member_created.data.email.clone(),
                 id: Uuid::from_u128(1),
                 exp: now.timestamp() + 15 * 60,
                 role: "MEMBER".into()

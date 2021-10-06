@@ -2,15 +2,9 @@
 
 use super::handler;
 use crate::io::jwt::Claims;
-use crate::io::password::mock::{hash, verify};
+use crate::io::password::mock::verify;
 use crate::io::result::{ClientError, Error};
-use crate::{
-    domain::identities::{
-        repo::mock::RepoMock,
-        types::{CreatedData, CreatedEvent},
-    },
-    io::jwt::Jwt,
-};
+use crate::{domain::identities::repo::mock::RepoMock, io::jwt::Jwt};
 use chrono::Utc;
 use uuid::Uuid;
 
@@ -37,14 +31,7 @@ async fn authentication_failed() {
     let mut repo = RepoMock::new();
     let jwt = Jwt::from_secret("supersecret");
     let now = Utc::now();
-
-    repo.insert_fixture(CreatedEvent::new(
-        Uuid::from_u128(1),
-        1,
-        CreatedData::mock_member(),
-        Uuid::from_u128(2),
-        now,
-    ));
+    repo.member_created();
 
     let result = handler(
         &mut repo,
@@ -69,20 +56,14 @@ async fn signed_in() {
     let jwt = Jwt::from_secret("pillutadig");
     let now = Utc::now();
 
-    repo.insert_fixture(CreatedEvent::new(
-        Uuid::from_u128(1),
-        1,
-        CreatedData::mock_member(),
-        Uuid::from_u128(2),
-        now,
-    ));
+    let member_created = repo.member_created();
 
     let response = handler(
         &mut repo,
         verify,
         jwt.clone(),
         now,
-        "existing_member@example.com",
+        &member_created.data.email,
         "correct_password",
     )
     .await
