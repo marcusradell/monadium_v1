@@ -17,6 +17,7 @@ pub enum ErrorCode {
     InternalError,
     AuthFailed,
     AuthTokenExpired,
+    AccessDenied,
     BadRequest,
 }
 
@@ -28,10 +29,13 @@ pub struct ClientError {
 }
 
 impl ClientError {
-    pub fn new(code: ErrorCode, message: &str) -> Self {
+    pub fn access_denied(actual_role: &str, expected_role: &str) -> Self {
         Self {
-            code: code,
-            message: message.into(),
+            code: ErrorCode::AccessDenied,
+            message: format!(
+                "Found role {}, but expected {}.",
+                actual_role, expected_role
+            ),
         }
     }
 

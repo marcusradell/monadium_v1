@@ -46,12 +46,9 @@ pub async fn controller(
     let claims = jwt.decode(bearer_token)?;
 
     if claims.role != "OWNER" && claims.id != query.id {
-        return Err(Error::BadRequest(ClientError::new(
-            "ACCESS_DENIED",
-            &format!(
-                "identities/show requires the role OWNER or to own the data based on identity ID. Found; - role: {} - id: {}.",
-                claims.role, claims.id
-            ),
+        return Err(Error::BadRequest(ClientError::access_denied(
+            &claims.role,
+            "OWNER",
         )));
     }
 
