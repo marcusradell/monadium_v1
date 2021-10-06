@@ -61,7 +61,10 @@ async fn authentication_failed() {
     .await
     .unwrap_err();
 
-    assert_eq!(result, Error::BadRequest(ClientError::auth_failed()))
+    assert_eq!(
+        result,
+        Error::BadRequest(ClientError::authentication_failed())
+    )
 }
 
 #[actix_rt::test]

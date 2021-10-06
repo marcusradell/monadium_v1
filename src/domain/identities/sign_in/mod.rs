@@ -36,7 +36,7 @@ pub async fn handler(
 
     // TODO: handle false result inside verify.
     match verify_result {
-        false => Err(Error::BadRequest(ClientError::auth_failed())),
+        false => Err(Error::BadRequest(ClientError::authentication_failed())),
         true => {
             let encoded_jwt = jwt.encode(
                 &identity.stream_id,
