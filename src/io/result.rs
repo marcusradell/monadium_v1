@@ -11,7 +11,7 @@ pub enum Error {
 }
 
 #[derive(Debug, Display, Serialize, PartialEq)]
-#[serde(rename_all = "UPPERCASE")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ErrorCode {
     NotFound,
     InternalError,
