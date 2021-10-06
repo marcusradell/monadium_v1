@@ -17,6 +17,7 @@ pub enum ErrorCode {
     InternalError,
     AuthFailed,
     AuthTokenExpired,
+    BadRequest,
 }
 
 #[derive(Debug, Display, Serialize, PartialEq)]
@@ -30,6 +31,13 @@ impl ClientError {
     pub fn new(code: ErrorCode, message: &str) -> Self {
         Self {
             code: code,
+            message: message.into(),
+        }
+    }
+
+    pub fn bad_request(message: &str) -> Self {
+        Self {
+            code: ErrorCode::BadRequest,
             message: message.into(),
         }
     }

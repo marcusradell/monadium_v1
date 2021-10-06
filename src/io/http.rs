@@ -50,15 +50,15 @@ pub fn jwt_from(req: HttpRequest) -> Result<String, Error> {
     let result = req
         .headers()
         .get(header::AUTHORIZATION)
-        .ok_or(Error::BadRequest(ClientError::new("BAD_AUTHORIZATION_HEADER", "Missing the Authorization header. Check the value and try again.")))?
+        .ok_or(Error::BadRequest(ClientError::bad_request("Missing the Authorization header. Check the value and try again.")))?
         .to_str()
         .map_err(|_| 
-            Error::BadRequest(ClientError::new("BAD_AUTHORIZATION_HEADER",
+            Error::BadRequest(ClientError::bad_request(
                 "Failed to parse the Authorization header as an ASCII string. Check the value and try again."))
         )?
         .split_once("Bearer ").map(|(_, bearer_token)| {
 bearer_token
-        }).ok_or(Error::BadRequest(ClientError::new("BAD_AUTHORIZATION_HEADER", "Couldn't split the string on 'Bearer '. Check the value and try again.")))?;
+        }).ok_or(Error::BadRequest(ClientError::bad_request( "Couldn't split the Authorization value on 'Bearer '. Did you forget to add 'Bearer ' in front of the JWT?")))?;
 
     Ok(result.into())
 }
