@@ -14,12 +14,14 @@ pub async fn controller(
     web_jwt: web::Data<Jwt>,
     web_args: web::Json<Args>,
 ) -> Result<HttpResponse> {
+    let args = web_args.into_inner();
     let result = handler(
         &mut web_repo.get_ref().clone(),
         verify,
         web_jwt.get_ref().clone(),
         Utc::now(),
-        web_args.into_inner(),
+        &args.email,
+        &args.password,
     )
     .await?;
 

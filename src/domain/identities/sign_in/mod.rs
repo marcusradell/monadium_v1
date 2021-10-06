@@ -24,17 +24,18 @@ pub async fn handler(
     verify: Verify,
     jwt: Jwt,
     now: DateTime<Utc>,
-    args: Args,
+    email: &str,
+    password: &str,
 ) -> Result<Response, Error> {
     let identity = repo
-        .find_by_email(&args.email)
+        .find_by_email(email)
         .await?
         .ok_or(Error::BadRequest(ClientError::new(
             "NOT_FOUND",
-            &format!("Could not find an identity with email {}", args.email),
+            &format!("Could not find an identity with email {}", email),
         )))?;
 
-    let verify_result = verify(&identity.data.password_hash, &args.password)?;
+    let verify_result = verify(&identity.data.password_hash, password)?;
 
     // TODO: handle false result inside verify.
     match verify_result {
@@ -46,7 +47,7 @@ pub async fn handler(
             let encoded_jwt = jwt.encode(
                 &identity.stream_id,
                 &identity.data.role,
-                &args.email.clone(),
+                email,
                 now.timestamp(),
             )?;
             Ok(Response { jwt: encoded_jwt })

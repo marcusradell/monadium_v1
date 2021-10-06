@@ -1,6 +1,5 @@
 #![cfg(test)]
 
-use crate::domain::identities::sign_in::Args;
 use crate::io::password::mock::{hash, verify};
 use crate::io::result::{ClientError, Error};
 use crate::{domain::identities::sign_in::handler, io::jwt::Claims};
@@ -20,18 +19,9 @@ async fn not_found() {
     let jwt = Jwt::from_secret("secret");
     let now = Utc::now();
 
-    let result = handler(
-        &mut repo,
-        verify,
-        jwt,
-        now,
-        Args {
-            email: "email@example.com".into(),
-            password: "password".into(),
-        },
-    )
-    .await
-    .unwrap_err();
+    let result = handler(&mut repo, verify, jwt, now, "email@example.com", "password")
+        .await
+        .unwrap_err();
 
     assert_eq!(
         result,
@@ -65,10 +55,8 @@ async fn authentication_failed() {
         verify,
         jwt,
         now,
-        Args {
-            email: "existing_user_wrong_pass@example.com".into(),
-            password: "failedpassword".into(),
-        },
+        "existing_user_wrong_pass@example.com",
+        "failedpassword",
     )
     .await
     .unwrap_err();
@@ -105,10 +93,8 @@ async fn signed_in() {
         verify,
         jwt.clone(),
         now,
-        Args {
-            email: "existing_user@example.com".into(),
-            password: "correct_password".into(),
-        },
+        "existing_user@example.com",
+        "correct_password",
     )
     .await
     .unwrap();
