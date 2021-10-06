@@ -70,7 +70,7 @@ impl From<jsonwebtoken::errors::Error> for Error {
     fn from(error: jsonwebtoken::errors::Error) -> Error {
         match *error.kind() {
             jwt_errors::ErrorKind::ExpiredSignature => {
-                Error::BadRequest(ClientError::auth_token_expired())
+                Error::BadRequest(ClientError::authentication_expired())
             }
             _ => Error::BadRequest(ClientError::internal_error()),
         }

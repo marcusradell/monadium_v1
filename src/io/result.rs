@@ -49,14 +49,14 @@ impl ClientError {
         }
     }
 
-    pub fn auth_failed() -> Self {
+    pub fn authentication_failed() -> Self {
         Self {
             code: ErrorCode::AuthFailed,
             message: "Wrong email or password.".into(),
         }
     }
 
-    pub fn auth_token_expired() -> Self {
+    pub fn authentication_expired() -> Self {
         Self {
             code: ErrorCode::AuthTokenExpired,
             message: "Your JWT has expired. Please sign in again to receive and new one.".into(),
