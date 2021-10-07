@@ -19,16 +19,19 @@ impl RepoMock {
         RepoMock { data: vec![] }
     }
 
-    pub fn member_created(&mut self) -> CreatedEvent {
+    pub fn member_created(&mut self) -> (CreatedEvent, String) {
+        let (member, password) = CreatedData::mock_member();
+
         let event = CreatedEvent::new(
             Uuid::from_u128(1),
             1,
-            CreatedData::mock_member(),
+            member,
             Uuid::from_u128(2),
             Utc::now(),
         );
         self.data.push(event.clone());
-        event
+
+        (event, password)
     }
 
     pub fn data(&self) -> &Vec<CreatedEvent> {

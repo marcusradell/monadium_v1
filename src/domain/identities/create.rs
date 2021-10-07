@@ -112,12 +112,12 @@ mod test {
         let mut repo = RepoMock::new();
         let now = Utc::now();
 
-        let member_created = repo.member_created();
+        let (member_created, password) = repo.member_created();
 
         let handler_result = handler(
             Args {
                 email: member_created.data.email.clone(),
-                password: "correct_password".into(),
+                password,
             },
             "nomatch@example.com".into(),
             "password".into(),

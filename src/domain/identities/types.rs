@@ -14,12 +14,17 @@ pub struct CreatedData {
 }
 
 impl CreatedData {
-    pub fn mock_member() -> Self {
-        Self {
-            email: "existing_member@example.com".into(),
-            password_hash: hash("correct_password").unwrap(),
-            role: "MEMBER".into(),
-        }
+    pub fn mock_member() -> (Self, String) {
+        let password = "correct_password";
+
+        (
+            Self {
+                email: "existing_member@example.com".into(),
+                password_hash: hash(password).unwrap(),
+                role: "MEMBER".into(),
+            },
+            password.into(),
+        )
     }
 }
 

@@ -56,7 +56,7 @@ async fn signed_in() {
     let jwt = Jwt::from_secret("pillutadig");
     let now = Utc::now();
 
-    let member_created = repo.member_created();
+    let (member_created, password) = repo.member_created();
 
     let response = handler(
         &mut repo,
@@ -64,7 +64,7 @@ async fn signed_in() {
         jwt.clone(),
         now,
         &member_created.data.email,
-        "correct_password",
+        &password,
     )
     .await
     .unwrap();
