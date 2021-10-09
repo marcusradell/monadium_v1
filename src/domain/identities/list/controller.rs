@@ -1,21 +1,10 @@
-use crate::io::{
-    http,
-    jwt::Jwt,
-    result::{ClientError, Error},
-};
-use actix_web::{web, HttpRequest, HttpResponse};
+use actix_web::{HttpRequest, HttpResponse, web};
 use sqlx::PgPool;
 
-use super::types::CreatedEvent;
+use crate::io::{http, jwt::Jwt, result::{ClientError, Error}};
 
-pub async fn handler(db: &PgPool) -> Result<Vec<CreatedEvent>, Error> {
-    let result = sqlx::query_as::<_, CreatedEvent>("select * from identities.events")
-        .fetch_all(db)
-        .await?;
+use super::handler;
 
-    // We only support a single CREATED event, so no reduction is needed.
-    Ok(result)
-}
 
 pub async fn controller(
     db: web::Data<PgPool>,
