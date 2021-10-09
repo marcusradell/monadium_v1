@@ -1,13 +1,16 @@
-use actix_web::{HttpRequest, HttpResponse, web};
-use sqlx::PgPool;
-
-use crate::io::{http, jwt::Jwt, result::{ClientError, Error}};
-
 use super::handler;
-
+use crate::{
+    domain::identities::repo::Repo,
+    io::{
+        http,
+        jwt::Jwt,
+        result::{ClientError, Error},
+    },
+};
+use actix_web::{web, HttpRequest, HttpResponse};
 
 pub async fn controller(
-    db: web::Data<PgPool>,
+    repo: web::Data<Repo>,
     jwt: web::Data<Jwt>,
     req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
@@ -22,7 +25,7 @@ pub async fn controller(
         )));
     }
 
-    let result = handler(db.get_ref()).await?;
+    let result = handler(&mut repo.get_ref().clone()).await?;
 
     Ok(HttpResponse::Ok().json(result))
 }

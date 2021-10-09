@@ -1,11 +1,15 @@
-use actix_web::{HttpResponse, web};
+use super::{handler, Args};
+use crate::{
+    domain::identities::repo::Repo,
+    io::{
+        jwt::Jwt,
+        password::{hash, verify},
+        result::Error,
+    },
+};
+use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use uuid::Uuid;
-
-use crate::{domain::identities::repo::Repo, io::{jwt::Jwt, password::{hash, verify}, result::Error}};
-
-use super::{Args, handler};
-
 
 pub async fn controller(
     args: web::Json<Args>,

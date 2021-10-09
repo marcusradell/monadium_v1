@@ -2,7 +2,7 @@
 
 use super::{
     super::types::{CreatedData, CreatedEvent},
-    types::{RepoCreate, RepoFindByEmail},
+    types::{RepoCreate, RepoFindByEmail, RepoList},
 };
 use crate::io::result::Result;
 use async_trait::async_trait;
@@ -68,5 +68,12 @@ impl RepoFindByEmail for RepoMock {
             .clone()
             .into_iter()
             .find(|item| item.data.email == email))
+    }
+}
+
+#[async_trait]
+impl RepoList for RepoMock {
+    async fn list(&mut self) -> Result<Vec<CreatedEvent>> {
+        Ok(self.data.clone())
     }
 }

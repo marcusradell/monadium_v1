@@ -9,7 +9,7 @@ use crate::io::{
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::{types::Json, PgPool};
-use types::{RepoCreate, RepoFindByEmail};
+use types::{RepoCreate, RepoFindByEmail, RepoList};
 use uuid::Uuid;
 #[derive(Clone)]
 pub struct Repo {
@@ -69,6 +69,18 @@ impl RepoFindByEmail for Repo {
         )
         .fetch_optional(&self.db)
         .await?)
+    }
+}
+
+#[async_trait]
+impl RepoList for Repo {
+    async fn list(&mut self) -> Result<Vec<Event<CreatedData>>> {
+        let result = sqlx::query_as::<_, CreatedEvent>("select * from identities.events")
+            .fetch_all(&self.db)
+            .await?;
+
+        // We only support a single CREATED event, so no reduction is needed.
+        Ok(result)
     }
 }
 

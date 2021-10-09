@@ -20,3 +20,8 @@ pub trait RepoCreate {
 pub trait RepoFindByEmail {
     async fn find_by_email(&mut self, email: &str) -> Result<Option<CreatedEvent>>;
 }
+
+#[async_trait]
+pub trait RepoList {
+    async fn list(&mut self) -> Result<Vec<CreatedEvent>>;
+}

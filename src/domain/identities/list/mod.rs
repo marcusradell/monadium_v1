@@ -1,14 +1,10 @@
 mod controller;
-pub use controller::controller;
-use sqlx::PgPool;    
-use crate::io::result::Error;
+mod test;
 use super::types::CreatedEvent;
+use crate::domain::identities::repo::types::RepoList;
+use crate::io::result::Error;
+pub use controller::controller;
 
-pub async fn handler(db: &PgPool) -> Result<Vec<CreatedEvent>, Error> {
-    let result = sqlx::query_as::<_, CreatedEvent>("select * from identities.events")
-        .fetch_all(db)
-        .await?;
-
-    // We only support a single CREATED event, so no reduction is needed.
-    Ok(result)
+pub async fn handler(repo: &mut impl RepoList) -> Result<Vec<CreatedEvent>, Error> {
+    repo.list().await
 }
