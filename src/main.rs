@@ -4,6 +4,7 @@ extern crate dotenv;
 use actix_web::{web, HttpServer};
 use dotenv::dotenv;
 mod domain;
+mod event;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
