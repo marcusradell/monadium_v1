@@ -686,9 +686,9 @@ dependencies = [
 
 [[package]]
 name = "dev_api"
-version = "0.1.17"
+version = "0.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "953dc2047c0daf13547d81480a7c3ab5944f9cc5839b0c1e4df1e998dd72dbd5"
+checksum = "2bd4a694b08e3e9d8207192ec499ced5e3790c020a9f052efe445257272a2b15"
 dependencies = [
  "actix-cors",
  "actix-web",
