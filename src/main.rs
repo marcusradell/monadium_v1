@@ -21,8 +21,19 @@ async fn main() -> std::io::Result<()> {
 
     let identities_repo = domain::identities::repo::Repo::new(&db);
 
+    let _deps_experiment = domain::deps_experiment::Deps {
+        fake_db: "fake_db".to_string(),
+        fake_mq: "fake_mq".to_string(),
+    };
+
     let server = HttpServer::new(move || {
         let configs: Vec<fn(&mut web::ServiceConfig)> = vec![
+            move |_cfg| {
+                // TODO: solve error[E0308]: mismatched types.
+                // Closures that capture a variable cannot be used as a function.
+
+                // _deps_experiment.config(_cfg);
+            },
             domain::health::config,
             domain::identities::config,
             domain::profiles::config,
@@ -30,7 +41,6 @@ async fn main() -> std::io::Result<()> {
 
         let app = dev_api::http::new(configs);
 
-        // Extend the app with your own dependencies.
         app.app_data(web::Data::new(jwt.clone()))
             .app_data(web::Data::new(identities_repo.clone()))
     })
