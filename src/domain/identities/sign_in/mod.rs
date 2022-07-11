@@ -27,20 +27,19 @@ pub async fn handler(
     repo: &mut impl RepoFindByEmail,
     jwt: Jwt,
     now: DateTime<Utc>,
-    email: &str,
-    password: &str,
+    args: &Args,
 ) -> Result<Response> {
     let identity = repo
-        .find_by_email(email)
+        .find_by_email(&args.email)
         .await?
-        .ok_or(Error::not_found(email))?;
+        .ok_or(Error::not_found(&args.email))?;
 
-    password::verify(&identity.data.password_hash, password)?;
+    password::verify(&identity.data.password_hash, &args.password)?;
 
     let tokens = jwt.create_tokens(HashMap::from([
         ("sub", &identity.stream_id),
         ("role", &identity.data.role),
-        ("email", email),
+        ("email", &args.email),
     ]))?;
 
     Ok(Response { tokens })
