@@ -1,16 +1,13 @@
-pub mod mock;
 pub mod types;
 
 use super::types::{CreatedData, CreatedEvent, EVENT_TYPE};
-use crate::io::{
-    event_store::types::Event,
-    result::{Error, Result},
-};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
+use dev_api::Result;
 use sqlx::{types::Json, PgPool};
 use types::{RepoCreate, RepoFindByEmail, RepoList};
 use uuid::Uuid;
+
 #[derive(Clone)]
 pub struct Repo {
     db: PgPool,
