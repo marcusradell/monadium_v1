@@ -1,5 +1,5 @@
-use crate::io::result::Error;
 use actix_web::{web, HttpResponse};
+use dev_api::Result;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -13,7 +13,7 @@ pub struct Event {
     name: String,
 }
 
-async fn handler(cmd: Command) -> Result<(), Error> {
+async fn handler(cmd: Command) -> Result<()> {
     dbg!(&cmd);
 
     let event = Event {
@@ -28,7 +28,7 @@ async fn handler(cmd: Command) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn controller(cmd: web::Json<Command>) -> Result<HttpResponse, Error> {
+pub async fn controller(cmd: web::Json<Command>) -> Result<HttpResponse> {
     let result = handler(cmd.into_inner()).await?;
     Ok(HttpResponse::Ok().json(result))
 }

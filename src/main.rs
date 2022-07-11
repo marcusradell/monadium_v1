@@ -25,7 +25,7 @@ async fn main() -> std::io::Result<()> {
         let configs: Vec<fn(&mut web::ServiceConfig)> = vec![
             domain::health::config,
             domain::identities::config,
-            // domain::profiles::config,
+            domain::profiles::config,
         ];
 
         let app = dev_api::http::new(configs);
