@@ -4,18 +4,20 @@ use super::Args;
 
 mod test {
     use chrono::Utc;
+    use dev_api::jwt::Jwt;
     use uuid::Uuid;
 
-    use crate::{domain::identities::{create::handler, repo::mock::RepoMock, types::{CreatedData, CreatedEvent}}, io::{
-            jwt::{Claims, Jwt},
-            password::mock::{hash, verify},
-        }};
+    use crate::domain::identities::{
+        create::handler,
+        repo::mock::RepoMock,
+        types::{CreatedData, CreatedEvent},
+    };
 
     use super::*;
 
     #[actix_rt::test]
     async fn sign_in_existing_member() {
-        let jwt = Jwt::from_secret("jwt_secret");
+        let jwt = Jwt::new("jwt_secret".as_bytes());
         let mut repo = RepoMock::new();
         let now = Utc::now();
 

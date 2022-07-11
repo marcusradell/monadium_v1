@@ -1,8 +1,9 @@
 use super::repo::types::RepoFindByEmail;
-use crate::io::jwt::Jwt;
-use crate::io::password::Verify;
-use crate::io::result::{ClientError, Error};
 use chrono::{DateTime, Utc};
+use dev_api::{
+    jwt::{tokens::Tokens, Jwt},
+    Error,
+};
 use serde::{Deserialize, Serialize};
 mod controller;
 pub use self::controller::*;
@@ -15,30 +16,29 @@ pub struct Args {
 }
 
 #[derive(serde::Serialize, Debug, PartialEq)]
-pub struct Response {
-    pub jwt: String,
+pub struct Response<'a> {
+    pub tokens: Tokens<'a>,
 }
 
-pub async fn handler(
+pub async fn handler<'a>(
     repo: &mut impl RepoFindByEmail,
-    verify: Verify,
     jwt: Jwt,
     now: DateTime<Utc>,
     email: &str,
     password: &str,
-) -> Result<Response, Error> {
+) -> Result<Response<'a>> {
     let identity = repo
         .find_by_email(email)
         .await?
-        .ok_or(Error::BadRequest(ClientError::not_found(email)))?;
+        .ok_or(Error::not_found(email))?;
 
     verify(&identity.data.password_hash, password)?;
 
-    let encoded_jwt = jwt.encode(
+    let tokens = jwt.encode(
         &identity.stream_id,
         &identity.data.role,
         email,
         now.timestamp(),
     )?;
-    Ok(Response { jwt: encoded_jwt })
+    Ok(Response { tokens })
 }

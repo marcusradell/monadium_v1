@@ -1,17 +1,16 @@
-mod test;
-mod controller;
-pub use controller::controller;
+use std::collections::HashMap;
+
+// mod controller;
+// mod test;
+// pub use controller::controller;
+use dev_api::{jwt::Jwt, Result};
 
 use super::{
-    repo::{
-        types::{RepoCreate, RepoFindByEmail},
-    },
+    repo::types::{RepoCreate, RepoFindByEmail},
     sign_in,
     types::CreatedData,
 };
-use crate::io::jwt::Jwt;
-use crate::io::password::{Hash, Verify};
-use crate::io::result::Error;
+
 use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
@@ -33,7 +32,7 @@ pub async fn handler(
     repo: &mut (impl RepoCreate + RepoFindByEmail),
     now: DateTime<Utc>,
     id: Uuid,
-) -> Result<sign_in::Response, Error> {
+) -> Result<sign_in::Response> {
     let role = if owner_email == args.email && owner_password == args.password {
         "OWNER"
     } else {
@@ -55,13 +54,16 @@ pub async fn handler(
                 role: role.to_string(),
             };
             repo.create(id, data, cid, now).await?;
+
+            let mut claims: HashMap<String, serde_json::Value> = HashMap::new();
+            claims.insert("sub".to_string(), serde_json::Value::String(data.email));
+            claims.insert("email".to_string(), serde_json::Value::String(data.email));
+
             let result = sign_in::Response {
-                jwt: jwt.encode(&id, &role, &args.email, now.timestamp())?,
+                jwt: jwt.create_tokens(claims)?,
             };
 
             Ok(result)
         }
     }
 }
-
-
