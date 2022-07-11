@@ -59,18 +59,19 @@ pub async fn handler<'a>(
         None => {
             let password_hash = hash(&args.password)?;
             let data = CreatedData {
-                email: args.email.clone(),
+                email: args.email,
                 password_hash,
                 role: role.to_string(),
             };
+            let email = data.email.clone();
+
             repo.create(id, data, cid, now).await?;
 
-            let mut claims: HashMap<String, serde_json::Value> = HashMap::new();
-            claims.insert("sub".to_string(), serde_json::Value::String(data.email));
-            claims.insert("email".to_string(), serde_json::Value::String(data.email));
-
             let result = sign_in::Response {
-                tokens: jwt.create_tokens(claims)?,
+                tokens: jwt.create_tokens_from_str(HashMap::from([
+                    ("sub", id.to_hyphenated().to_string().as_str()),
+                    ("email", &email),
+                ]))?,
             };
 
             Ok(result)

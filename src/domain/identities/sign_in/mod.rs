@@ -36,8 +36,12 @@ pub async fn handler(
 
     password::verify(&identity.data.password_hash, &args.password)?;
 
-    let tokens = jwt.create_tokens(HashMap::from([
-        ("sub", &identity.stream_id),
+    let tokens = jwt.create_tokens_from_str(HashMap::from([
+        (
+            "sub",
+            identity.stream_id.to_hyphenated().to_string().as_str(),
+        ),
+        ("role", &identity.data.role),
         ("role", &identity.data.role),
         ("email", &args.email),
     ]))?;

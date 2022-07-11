@@ -1,7 +1,7 @@
 use super::super::types::{CreatedData, CreatedEvent};
-use crate::io::result::Result;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
+use dev_api::Result;
 use uuid::Uuid;
 
 #[async_trait]

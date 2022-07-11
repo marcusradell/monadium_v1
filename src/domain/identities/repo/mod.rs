@@ -1,9 +1,11 @@
 pub mod types;
 
+use crate::event::Event;
+
 use super::types::{CreatedData, CreatedEvent, EVENT_TYPE};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use dev_api::Result;
+use dev_api::{Error, Result};
 use sqlx::{types::Json, PgPool};
 use types::{RepoCreate, RepoFindByEmail, RepoList};
 use uuid::Uuid;
@@ -107,7 +109,7 @@ impl Repo {
         )
         .fetch_optional(&self.db)
         .await?
-        .ok_or(Error::InternalServerError)
+        .ok_or(Error::internal_error())
     }
 }
 
