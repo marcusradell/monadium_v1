@@ -33,7 +33,7 @@ pub async fn handler<'a>(
     repo: &mut (impl RepoCreate + RepoFindByEmail),
     now: DateTime<Utc>,
     id: Uuid,
-) -> Result<sign_in::Response<'a>> {
+) -> Result<sign_in::Response> {
     let role = if owner_email == args.email && owner_password == args.password {
         "OWNER"
     } else {
@@ -45,7 +45,16 @@ pub async fn handler<'a>(
     match exists {
         // Email found, try signing them in instead of creating a new identity.
         Some(_) => {
-            return sign_in::handler(repo, jwt, now, &args.email, &args.password).await;
+            return sign_in::handler(
+                repo,
+                jwt,
+                now,
+                &sign_in::Args {
+                    email: args.email,
+                    password: args.password,
+                },
+            )
+            .await;
         }
         None => {
             let password_hash = hash(&args.password)?;
