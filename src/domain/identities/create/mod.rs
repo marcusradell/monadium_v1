@@ -3,7 +3,7 @@ use std::collections::HashMap;
 // mod controller;
 // mod test;
 // pub use controller::controller;
-use dev_api::{jwt::Jwt, Result};
+use dev_api::{jwt::Jwt, password, Result};
 
 use super::{
     repo::types::{RepoCreate, RepoFindByEmail},
@@ -21,18 +21,18 @@ pub struct Args {
     pub password: String,
 }
 
-pub async fn handler(
+pub async fn handler<'a>(
     args: Args,
     owner_email: &str,
     owner_password: &str,
     cid: Uuid,
-    verify: Verify,
-    hash: Hash,
+    verify: password::Verify,
+    hash: password::Hash,
     jwt: Jwt,
     repo: &mut (impl RepoCreate + RepoFindByEmail),
     now: DateTime<Utc>,
     id: Uuid,
-) -> Result<sign_in::Response> {
+) -> Result<sign_in::Response<'a>> {
     let role = if owner_email == args.email && owner_password == args.password {
         "OWNER"
     } else {
@@ -44,7 +44,7 @@ pub async fn handler(
     match exists {
         // Email found, try signing them in instead of creating a new identity.
         Some(_) => {
-            return sign_in::handler(repo, verify, jwt, now, &args.email, &args.password).await;
+            return sign_in::handler(repo, jwt, now, &args.email, &args.password).await;
         }
         None => {
             let password_hash = hash(&args.password)?;
@@ -60,7 +60,7 @@ pub async fn handler(
             claims.insert("email".to_string(), serde_json::Value::String(data.email));
 
             let result = sign_in::Response {
-                jwt: jwt.create_tokens(claims)?,
+                tokens: jwt.create_tokens(claims)?,
             };
 
             Ok(result)
