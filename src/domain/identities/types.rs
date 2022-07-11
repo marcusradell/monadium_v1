@@ -1,9 +1,10 @@
 use chrono::{DateTime, Utc};
+use dev_api::password;
 use serde::{Deserialize, Serialize};
 use sqlx::types::Json;
 use uuid::Uuid;
 
-use crate::io::{event_store::types::Event, password::mock::hash};
+use crate::event::Event;
 
 pub const CREATED: &str = "IDENTITIES/CREATED";
 #[derive(Serialize, Deserialize, sqlx::FromRow, Debug, Clone, PartialEq)]
@@ -20,7 +21,7 @@ impl CreatedData {
         (
             Self {
                 email: "existing_member@example.com".into(),
-                password_hash: hash(password).unwrap(),
+                password_hash: password::hash(password).unwrap(),
                 role: "MEMBER".into(),
             },
             password.into(),

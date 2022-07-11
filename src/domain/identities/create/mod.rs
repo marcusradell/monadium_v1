@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
-// mod controller;
+mod controller;
 // mod test;
-// pub use controller::controller;
+
+pub use controller::controller;
 use dev_api::{jwt::Jwt, password, Result};
 
 use super::{

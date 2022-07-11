@@ -2,10 +2,14 @@ use super::{handler, Args};
 use crate::domain::identities::repo::Repo;
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
-use dev_api::{jwt::Jwt, Result};
+use dev_api::{
+    jwt::Jwt,
+    password::{hash, verify},
+    Result,
+};
 use uuid::Uuid;
 
-pub async fn controller(
+pub async fn controller<'a>(
     args: web::Json<Args>,
     jwt: web::Data<Jwt>,
     repo: web::Data<Repo>,
