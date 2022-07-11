@@ -25,14 +25,14 @@ async fn main() -> std::io::Result<()> {
         let configs: Vec<fn(&mut web::ServiceConfig)> = vec![
             domain::health::config,
             domain::identities::config,
-            domain::profiles::config,
+            // domain::profiles::config,
         ];
 
         let app = dev_api::http::new(configs);
 
         // Extend the app with your own dependencies.
         app.app_data(web::Data::new(jwt.clone()))
-            .app_data(web::Data::new(identities_repo))
+            .app_data(web::Data::new(identities_repo.clone()))
     })
     .bind(("0.0.0.0", 8080))?
     .run();
