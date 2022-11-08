@@ -22,11 +22,6 @@ async fn main() -> std::io::Result<()> {
 
     let identities_repo = domain::identities::repo::Repo::new(&db);
 
-    let _deps_experiment = domain::deps_experiment::Deps {
-        fake_db: "fake_db".to_string(),
-        fake_mq: "fake_mq".to_string(),
-    };
-
     let server = HttpServer::new(move || {
         let configs: Vec<fn(&mut web::ServiceConfig)> = vec![
             move |_cfg| {
