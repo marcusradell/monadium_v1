@@ -45,7 +45,7 @@ pub async fn handler<'a>(
     match exists {
         // Email found, try signing them in instead of creating a new identity.
         Some(_) => {
-            return sign_in::handler(
+            sign_in::handler(
                 repo,
                 jwt,
                 now,
@@ -54,7 +54,7 @@ pub async fn handler<'a>(
                     password: args.password,
                 },
             )
-            .await;
+            .await
         }
         None => {
             let password_hash = hash(&args.password)?;
