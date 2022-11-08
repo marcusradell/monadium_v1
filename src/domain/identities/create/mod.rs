@@ -27,7 +27,6 @@ pub async fn handler(
     owner_email: &str,
     owner_password: &str,
     cid: Uuid,
-    verify: password::Verify,
     hash: password::Hash,
     jwt: Jwt,
     repo: &mut (impl RepoCreate + RepoFindByEmail),
