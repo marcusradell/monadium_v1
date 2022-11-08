@@ -2,11 +2,7 @@ use super::{handler, Args};
 use crate::domain::identities::repo::Repo;
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
-use dev_api::{
-    jwt::Jwt,
-    password::{hash, verify},
-    Result,
-};
+use dev_api::{jwt::Jwt, password::hash, Result};
 use uuid::Uuid;
 
 pub async fn controller<'a>(
@@ -30,7 +26,6 @@ pub async fn controller<'a>(
         &owner_email,
         &owner_password,
         cid,
-        verify,
         hash,
         jwt.get_ref().clone(),
         &mut repo.get_ref().clone(),
