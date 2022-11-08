@@ -51,16 +51,4 @@ impl Claims {
             role,
         })
     }
-
-    pub fn get_subject(&self) -> String {
-        self.sub.clone()
-    }
-
-    pub fn get_email(&self) -> String {
-        self.email.clone()
-    }
-
-    pub fn get_role(&self) -> String {
-        self.role.clone()
-    }
 }
