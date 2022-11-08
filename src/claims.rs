@@ -5,11 +5,11 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Claims {
-    sub: String,
-    exp: i64,
-    r#type: TokenType,
-    email: String,
-    role: String,
+    pub sub: String,
+    pub exp: i64,
+    pub r#type: TokenType,
+    pub email: String,
+    pub role: String,
 }
 
 fn get_value(
