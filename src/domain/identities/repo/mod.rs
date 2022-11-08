@@ -1,16 +1,15 @@
-pub mod mock;
 pub mod types;
 
-use super::types::{CreatedData, CreatedEvent, EVENT_TYPE};
-use crate::io::{
-    event_store::types::Event,
-    result::{Error, Result},
-};
+use crate::event::Event;
+
+use super::types::{CreatedData, CreatedEvent, CREATED};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
+use dev_api::{Error, Result};
 use sqlx::{types::Json, PgPool};
 use types::{RepoCreate, RepoFindByEmail, RepoList};
 use uuid::Uuid;
+
 #[derive(Clone)]
 pub struct Repo {
     db: PgPool,
@@ -36,7 +35,7 @@ impl RepoCreate for Repo {
             "#,
             id,
             1,
-            EVENT_TYPE,
+            CREATED,
             data as _,
             cid,
             inserted_at
@@ -105,12 +104,12 @@ impl Repo {
             event_type = $1 and
             stream_id = $2
             limit 1"#,
-            EVENT_TYPE,
+            CREATED,
             id
         )
         .fetch_optional(&self.db)
         .await?
-        .ok_or(Error::InternalServerError)
+        .ok_or(Error::internal_error())
     }
 }
 

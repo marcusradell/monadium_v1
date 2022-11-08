@@ -1,17 +1,17 @@
-mod test;
+use std::collections::HashMap;
+
 mod controller;
+// mod test;
+
 pub use controller::controller;
+use dev_api::{jwt::Jwt, password, Result};
 
 use super::{
-    repo::{
-        types::{RepoCreate, RepoFindByEmail},
-    },
+    repo::types::{RepoCreate, RepoFindByEmail},
     sign_in,
     types::CreatedData,
 };
-use crate::io::jwt::Jwt;
-use crate::io::password::{Hash, Verify};
-use crate::io::result::Error;
+
 use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
@@ -27,13 +27,12 @@ pub async fn handler(
     owner_email: &str,
     owner_password: &str,
     cid: Uuid,
-    verify: Verify,
-    hash: Hash,
+    hash: password::Hash,
     jwt: Jwt,
     repo: &mut (impl RepoCreate + RepoFindByEmail),
     now: DateTime<Utc>,
     id: Uuid,
-) -> Result<sign_in::Response, Error> {
+) -> Result<sign_in::Response> {
     let role = if owner_email == args.email && owner_password == args.password {
         "OWNER"
     } else {
@@ -45,23 +44,35 @@ pub async fn handler(
     match exists {
         // Email found, try signing them in instead of creating a new identity.
         Some(_) => {
-            return sign_in::handler(repo, verify, jwt, now, &args.email, &args.password).await;
+            sign_in::handler(
+                repo,
+                jwt,
+                &sign_in::Args {
+                    email: args.email,
+                    password: args.password,
+                },
+            )
+            .await
         }
         None => {
             let password_hash = hash(&args.password)?;
             let data = CreatedData {
-                email: args.email.clone(),
+                email: args.email,
                 password_hash,
                 role: role.to_string(),
             };
+            let email = data.email.clone();
+
             repo.create(id, data, cid, now).await?;
+
             let result = sign_in::Response {
-                jwt: jwt.encode(&id, &role, &args.email, now.timestamp())?,
+                tokens: jwt.create_tokens_from_str(HashMap::from([
+                    ("sub", id.to_hyphenated().to_string().as_str()),
+                    ("email", &email),
+                ]))?,
             };
 
             Ok(result)
         }
     }
 }
-
-

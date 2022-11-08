@@ -1,12 +1,15 @@
+use std::collections::HashMap;
+
 use super::repo::types::RepoFindByEmail;
-use crate::io::jwt::Jwt;
-use crate::io::password::Verify;
-use crate::io::result::{ClientError, Error};
-use chrono::{DateTime, Utc};
+use dev_api::{
+    jwt::{tokens::Tokens, Jwt},
+    password, Error,
+};
 use serde::{Deserialize, Serialize};
 mod controller;
 pub use self::controller::*;
-mod test;
+use dev_api::Result;
+// mod test;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Args {
@@ -14,31 +17,28 @@ pub struct Args {
     pub password: String,
 }
 
-#[derive(serde::Serialize, Debug, PartialEq)]
+#[derive(serde::Serialize, Debug)]
 pub struct Response {
-    pub jwt: String,
+    pub tokens: Tokens,
 }
 
-pub async fn handler(
-    repo: &mut impl RepoFindByEmail,
-    verify: Verify,
-    jwt: Jwt,
-    now: DateTime<Utc>,
-    email: &str,
-    password: &str,
-) -> Result<Response, Error> {
+pub async fn handler(repo: &mut impl RepoFindByEmail, jwt: Jwt, args: &Args) -> Result<Response> {
     let identity = repo
-        .find_by_email(email)
+        .find_by_email(&args.email)
         .await?
-        .ok_or(Error::BadRequest(ClientError::not_found(email)))?;
+        .ok_or(Error::not_found(&args.email))?;
 
-    verify(&identity.data.password_hash, password)?;
+    password::verify(&identity.data.password_hash, &args.password)?;
 
-    let encoded_jwt = jwt.encode(
-        &identity.stream_id,
-        &identity.data.role,
-        email,
-        now.timestamp(),
-    )?;
-    Ok(Response { jwt: encoded_jwt })
+    let tokens = jwt.create_tokens_from_str(HashMap::from([
+        (
+            "sub",
+            identity.stream_id.to_hyphenated().to_string().as_str(),
+        ),
+        ("role", &identity.data.role),
+        ("role", &identity.data.role),
+        ("email", &args.email),
+    ]))?;
+
+    Ok(Response { tokens })
 }

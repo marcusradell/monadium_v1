@@ -1,6 +1,6 @@
-use crate::io::result::Error;
 use actix_multipart::Multipart;
 use actix_web::HttpResponse;
+use dev_api::{Error, Result};
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 
@@ -15,7 +15,7 @@ pub struct Event {
     image: String,
 }
 
-async fn _handler(cmd: Command) -> Result<(), Error> {
+async fn _handler(cmd: Command) -> Result<()> {
     dbg!(&cmd);
 
     let event = Event {
@@ -30,19 +30,19 @@ async fn _handler(cmd: Command) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn controller(mut multipart: Multipart) -> Result<HttpResponse, Error> {
+pub async fn controller(mut multipart: Multipart) -> Result<HttpResponse> {
     while let Some(item) = multipart.next().await {
         let mut field = item.map_err(|e| {
-            dbg!(e);
-            Error::InternalServerError
+            tracing::error!("{:?}", e);
+            Error::internal_error()
         })?;
 
         while let Some(chunk) = field.next().await {
             println!(
                 "-- CHUNK: \n{:?}",
                 std::str::from_utf8(&chunk.map_err(|e| {
-                    dbg!(e);
-                    Error::InternalServerError
+                    tracing::error!("{:?}", e);
+                    Error::internal_error()
                 })?)
             );
         }

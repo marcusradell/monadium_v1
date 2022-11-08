@@ -1,12 +1,14 @@
 use chrono::{DateTime, Utc};
+use dev_api::password;
 use serde::{Deserialize, Serialize};
 use sqlx::types::Json;
 use uuid::Uuid;
 
-use crate::io::{event_store::types::Event, password::mock::hash};
+use crate::event::Event;
 
 pub const CREATED: &str = "IDENTITIES/CREATED";
-#[derive(Serialize, Deserialize, sqlx::FromRow, Debug, Clone, PartialEq)]
+
+#[derive(Serialize, Deserialize, sqlx::FromRow, Debug, Clone, PartialEq, Eq)]
 pub struct CreatedData {
     pub email: String,
     pub password_hash: String,
@@ -14,13 +16,13 @@ pub struct CreatedData {
 }
 
 impl CreatedData {
-    pub fn mock_member() -> (Self, String) {
+    pub fn _mock_member() -> (Self, String) {
         let password = "correct_password";
 
         (
             Self {
                 email: "existing_member@example.com".into(),
-                password_hash: hash(password).unwrap(),
+                password_hash: password::hash(password).unwrap(),
                 role: "MEMBER".into(),
             },
             password.into(),
@@ -31,7 +33,7 @@ impl CreatedData {
 pub type CreatedEvent = Event<CreatedData>;
 
 impl CreatedEvent {
-    pub fn new(
+    pub fn _new(
         stream_id: Uuid,
         sequence_num: i64,
         data: CreatedData,
@@ -49,5 +51,3 @@ impl CreatedEvent {
         }
     }
 }
-
-pub const EVENT_TYPE: &str = "IDENTITIES/CREATED";

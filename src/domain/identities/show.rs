@@ -1,11 +1,9 @@
+use crate::claims::Claims;
+
 use super::repo::Repo;
-use crate::io::{
-    http,
-    jwt::Jwt,
-    result::{ClientError, Error},
-};
-use actix_web::{web, HttpRequest, HttpResponse};
+use actix_web::{web, HttpResponse};
 use chrono::{DateTime, Utc};
+use dev_api::{Authorized, Error, Result};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -23,7 +21,7 @@ pub struct Identity {
     role: String,
 }
 
-pub async fn handler(repo: &Repo, args: Args) -> Result<Identity, Error> {
+pub async fn handler(repo: &Repo, args: Args) -> Result<Identity> {
     let result = repo.show(&args.id).await?;
 
     Ok(Identity {
@@ -36,20 +34,14 @@ pub async fn handler(repo: &Repo, args: Args) -> Result<Identity, Error> {
 }
 
 pub async fn controller(
-    jwt: web::Data<Jwt>,
-    req: HttpRequest,
     repo: web::Data<Repo>,
     query: web::Path<Args>,
-) -> Result<HttpResponse, Error> {
-    let bearer_token = http::jwt_from(req)?;
+    auth: Authorized,
+) -> Result<HttpResponse> {
+    let claims = Claims::from_hashmap(auth.get_claims())?;
 
-    let claims = jwt.decode(bearer_token)?;
-
-    if claims.role != "OWNER" && claims.id != query.id {
-        return Err(Error::BadRequest(ClientError::access_denied(
-            &claims.role,
-            "OWNER",
-        )));
+    if claims.role != "OWNER" && claims.sub != query.id.to_string() {
+        return Err(Error::access_denied(&claims.role, "OWNER"));
     }
 
     let result = handler(&repo, query.into_inner()).await?;
