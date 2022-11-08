@@ -22,7 +22,7 @@ pub struct Args {
     pub password: String,
 }
 
-pub async fn handler<'a>(
+pub async fn handler(
     args: Args,
     owner_email: &str,
     owner_password: &str,
