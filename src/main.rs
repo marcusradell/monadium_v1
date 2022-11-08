@@ -3,6 +3,7 @@ extern crate dotenv;
 
 use actix_web::{web, HttpServer};
 use dotenv::dotenv;
+mod claims;
 mod domain;
 mod event;
 
