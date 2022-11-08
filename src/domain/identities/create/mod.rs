@@ -47,7 +47,6 @@ pub async fn handler(
             sign_in::handler(
                 repo,
                 jwt,
-                now,
                 &sign_in::Args {
                     email: args.email,
                     password: args.password,

@@ -7,7 +7,8 @@ use uuid::Uuid;
 use crate::event::Event;
 
 pub const CREATED: &str = "IDENTITIES/CREATED";
-#[derive(Serialize, Deserialize, sqlx::FromRow, Debug, Clone, PartialEq)]
+
+#[derive(Serialize, Deserialize, sqlx::FromRow, Debug, Clone, PartialEq, Eq)]
 pub struct CreatedData {
     pub email: String,
     pub password_hash: String,
@@ -15,7 +16,7 @@ pub struct CreatedData {
 }
 
 impl CreatedData {
-    pub fn mock_member() -> (Self, String) {
+    pub fn _mock_member() -> (Self, String) {
         let password = "correct_password";
 
         (
@@ -32,7 +33,7 @@ impl CreatedData {
 pub type CreatedEvent = Event<CreatedData>;
 
 impl CreatedEvent {
-    pub fn new(
+    pub fn _new(
         stream_id: Uuid,
         sequence_num: i64,
         data: CreatedData,
@@ -50,5 +51,3 @@ impl CreatedEvent {
         }
     }
 }
-
-pub const EVENT_TYPE: &str = "IDENTITIES/CREATED";

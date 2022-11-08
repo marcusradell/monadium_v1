@@ -1,5 +1,4 @@
 use actix_web::{web, HttpResponse};
-use chrono::Utc;
 use dev_api::{jwt::Jwt, Result};
 
 use crate::domain::identities::repo::Repo;
@@ -15,7 +14,6 @@ pub async fn controller(
     let result = handler(
         &mut web_repo.get_ref().clone(),
         web_jwt.get_ref().clone(),
-        Utc::now(),
         &args,
     )
     .await?;

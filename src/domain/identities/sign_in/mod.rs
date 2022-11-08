@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use super::repo::types::RepoFindByEmail;
-use chrono::{DateTime, Utc};
 use dev_api::{
     jwt::{tokens::Tokens, Jwt},
     password, Error,
@@ -23,12 +22,7 @@ pub struct Response {
     pub tokens: Tokens,
 }
 
-pub async fn handler(
-    repo: &mut impl RepoFindByEmail,
-    jwt: Jwt,
-    now: DateTime<Utc>,
-    args: &Args,
-) -> Result<Response> {
+pub async fn handler(repo: &mut impl RepoFindByEmail, jwt: Jwt, args: &Args) -> Result<Response> {
     let identity = repo
         .find_by_email(&args.email)
         .await?

@@ -2,7 +2,7 @@ pub mod types;
 
 use crate::event::Event;
 
-use super::types::{CreatedData, CreatedEvent, EVENT_TYPE};
+use super::types::{CreatedData, CreatedEvent, CREATED};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use dev_api::{Error, Result};
@@ -35,7 +35,7 @@ impl RepoCreate for Repo {
             "#,
             id,
             1,
-            EVENT_TYPE,
+            CREATED,
             data as _,
             cid,
             inserted_at
@@ -104,7 +104,7 @@ impl Repo {
             event_type = $1 and
             stream_id = $2
             limit 1"#,
-            EVENT_TYPE,
+            CREATED,
             id
         )
         .fetch_optional(&self.db)

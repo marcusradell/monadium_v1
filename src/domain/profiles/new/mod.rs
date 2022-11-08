@@ -29,6 +29,6 @@ async fn handler(cmd: Command) -> Result<()> {
 }
 
 pub async fn controller(cmd: web::Json<Command>) -> Result<HttpResponse> {
-    let result = handler(cmd.into_inner()).await?;
-    Ok(HttpResponse::Ok().json(result))
+    handler(cmd.into_inner()).await?;
+    Ok(HttpResponse::Ok().finish())
 }
